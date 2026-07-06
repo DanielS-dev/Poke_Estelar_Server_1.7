@@ -1,0 +1,44 @@
+// Copyright 2023 The Forgotten Server Authors. All rights reserved.
+// Use of this source code is governed by the GPL-2.0 License that can be found in the LICENSE file.
+
+#include "otpch.h"
+
+#include "depotlocker.h"
+
+#include "inbox.h"
+
+DepotLocker::DepotLocker(uint16_t type) : Container(type), depotId(0) {}
+
+Attr_ReadValue DepotLocker::readAttr(AttrTypes_t attr, PropStream& propStream)
+{
+	if (attr == ATTR_DEPOT_ID) {
+		if (!propStream.read<uint16_t>(depotId)) {
+			return ATTR_READ_ERROR;
+		}
+		return ATTR_READ_CONTINUE;
+	}
+	return Item::readAttr(attr, propStream);
+}
+
+void DepotLocker::postAddNotification(Thing* thing, const Thing* oldParent, int32_t index, ReceiverLink_t)
+{
+	if (const auto parent = getParent()) {
+		parent->postAddNotification(thing, oldParent, index, LINK_PARENT);
+	}
+}
+
+void DepotLocker::postRemoveNotification(Thing* thing, const Thing* newParent, int32_t index, ReceiverLink_t)
+{
+	if (const auto parent = getParent()) {
+		parent->postRemoveNotification(thing, newParent, index, LINK_PARENT);
+	}
+}
+
+void DepotLocker::removeInbox(Inbox* inbox)
+{
+	auto cit = std::find(itemlist.begin(), itemlist.end(), inbox);
+	if (cit == itemlist.end()) {
+		return;
+	}
+	itemlist.erase(cit);
+}

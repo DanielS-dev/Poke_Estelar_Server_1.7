@@ -1,0 +1,43 @@
+// Copyright 2023 The Forgotten Server Authors. All rights reserved.
+// Use of this source code is governed by the GPL-2.0 License that can be found in the LICENSE file.
+
+#ifndef FS_DEPOTLOCKER_H
+#define FS_DEPOTLOCKER_H
+
+#include "container.h"
+
+class Inbox;
+
+using DepotLocker_ptr = std::shared_ptr<DepotLocker>;
+
+class DepotLocker final : public Container
+{
+public:
+	explicit DepotLocker(uint16_t type);
+
+	void removeInbox(Inbox* inbox);
+	uint16_t getDepotId() const { return depotId; }
+	void setDepotId(uint16_t depotId) { this->depotId = depotId; }
+
+	Attr_ReadValue readAttr(AttrTypes_t attr, PropStream& propStream) override;
+
+	DepotLocker* getDepotLocker() override { return this; }
+	const DepotLocker* getDepotLocker() const override { return this; }
+
+	ReturnValue queryAdd(int32_t, const Thing&, uint32_t, uint32_t, Creature* = nullptr) const override
+	{
+		return RETURNVALUE_NOTENOUGHROOM;
+	}
+
+	void postAddNotification(Thing* thing, const Thing* oldParent, int32_t index,
+	                         ReceiverLink_t link = LINK_OWNER) override;
+	void postRemoveNotification(Thing* thing, const Thing* newParent, int32_t index,
+	                            ReceiverLink_t link = LINK_OWNER) override;
+
+	bool canRemove() const override { return false; }
+
+private:
+	uint16_t depotId;
+};
+
+#endif // FS_DEPOTLOCKER_H
