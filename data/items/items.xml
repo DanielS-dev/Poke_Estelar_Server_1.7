@@ -42943,7 +42943,5 @@
 	<item id="59268" article="an" name="empty pokeball">
 		<attribute key="description" value="Possui 1.0x de chance de captura." />
 	</item>
-	<item id="59270" article="an" name="pokeball">
-		<attribute key="description" value="Está Pokebola contém um monstro." />
-	</item>
+	<item id="59270" article="an" name="pokeball"/>
 </items>

@@ -47,11 +47,22 @@ event.onLook = function(self, thing, position, distance, description)
 			description = string.format(str, description, thing:getHealth(), thing:getMaxHealth()) .. "."
 		end
 
-		local position = thing:getPosition()
-		description = string.format(
-			"%s\nPosition: %d, %d, %d",
-			description, position.x, position.y, position.z
-		)
+		local thingPosition = thing:getPosition()
+		local isPlayerInventoryItem = false
+		if thing:isItem() then
+			local topParent = thing:getTopParent()
+			isPlayerInventoryItem = topParent and topParent:isPlayer() or false
+			if position and position.x == CONTAINER_POSITION then
+				isPlayerInventoryItem = true
+			end
+		end
+
+		if not isPlayerInventoryItem then
+			description = string.format(
+				"%s\nPosition: %d, %d, %d",
+				description, thingPosition.x, thingPosition.y, thingPosition.z
+			)
+		end
 
 		if thing:isCreature() then
 			if thing:isPlayer() then
