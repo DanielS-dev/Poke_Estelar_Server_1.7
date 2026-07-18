@@ -44,6 +44,7 @@ class Logger
 		Logger& operator=(const Logger&) = delete;
 
 		void initialize(const Config& loggerConfig);
+		void initializeFromEnv(const std::filesystem::path& fileName);
 		void shutdown();
 
 		bool shouldLog(LogLevel level) const;

@@ -3,6 +3,7 @@
 #include "logger.hpp"
 
 #include <chrono>
+#include <cctype>
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
@@ -11,6 +12,25 @@
 #include <system_error>
 
 namespace {
+std::string trim(std::string value)
+{
+	const auto notSpace = [](unsigned char ch) {
+		return std::isspace(ch) == 0;
+	};
+
+	value.erase(value.begin(), std::find_if(value.begin(), value.end(), notSpace));
+	value.erase(std::find_if(value.rbegin(), value.rend(), notSpace).base(), value.end());
+	return value;
+}
+
+std::string toLower(std::string value)
+{
+	std::transform(value.begin(), value.end(), value.begin(), [](unsigned char ch) {
+		return static_cast<char>(std::tolower(ch));
+	});
+	return value;
+}
+
 const char* getLevelName(LogLevel level)
 {
 	switch (level) {
@@ -30,6 +50,113 @@ const char* getLevelName(LogLevel level)
 		default:
 			return "off";
 	}
+}
+
+LogLevel parseLevel(const std::string& value)
+{
+	const std::string level = toLower(trim(value));
+	if (level == "trace") {
+		return LogLevel::Trace;
+	}
+	if (level == "debug") {
+		return LogLevel::Debug;
+	}
+	if (level == "warn" || level == "warning") {
+		return LogLevel::Warn;
+	}
+	if (level == "error") {
+		return LogLevel::Error;
+	}
+	if (level == "fatal") {
+		return LogLevel::Fatal;
+	}
+	if (level == "off") {
+		return LogLevel::Off;
+	}
+	return LogLevel::Info;
+}
+
+std::string parseEnvValue(std::string value)
+{
+	value = trim(std::move(value));
+	if (value.empty()) {
+		return value;
+	}
+
+	const char first = value.front();
+	if (first == '"' || first == '\'') {
+		const auto endQuote = value.find(first, 1);
+		if (endQuote != std::string::npos) {
+			return value.substr(1, endQuote - 1);
+		}
+		return value.substr(1);
+	}
+
+	const auto commentPos = value.find('#');
+	if (commentPos != std::string::npos) {
+		value.erase(commentPos);
+	}
+	return trim(std::move(value));
+}
+
+std::unordered_map<std::string, std::string> loadEnvFile(const std::filesystem::path& fileName)
+{
+	std::unordered_map<std::string, std::string> env;
+	std::ifstream file(fileName);
+	if (!file.is_open()) {
+		return env;
+	}
+
+	std::string line;
+	while (std::getline(file, line)) {
+		line = trim(std::move(line));
+		if (line.empty() || line.front() == '#') {
+			continue;
+		}
+
+		const auto separator = line.find('=');
+		if (separator == std::string::npos) {
+			continue;
+		}
+
+		const std::string key = trim(line.substr(0, separator));
+		if (!key.empty()) {
+			env[key] = parseEnvValue(line.substr(separator + 1));
+		}
+	}
+
+	return env;
+}
+
+std::string getEnvString(const std::unordered_map<std::string, std::string>& env, const std::string& key,
+                         const std::string& defaultValue)
+{
+	if (const auto it = env.find(key); it != env.end()) {
+		return it->second;
+	}
+	return defaultValue;
+}
+
+bool getEnvBool(const std::unordered_map<std::string, std::string>& env, const std::string& key, bool defaultValue)
+{
+	if (const auto it = env.find(key); it != env.end()) {
+		const std::string value = toLower(trim(it->second));
+		return value == "1" || value == "true" || value == "yes" || value == "on";
+	}
+	return defaultValue;
+}
+
+uint32_t getEnvNumber(const std::unordered_map<std::string, std::string>& env, const std::string& key,
+                      uint32_t defaultValue)
+{
+	if (const auto it = env.find(key); it != env.end()) {
+		char* end = nullptr;
+		const unsigned long value = std::strtoul(it->second.c_str(), &end, 10);
+		if (end != it->second.c_str() && *end == '\0') {
+			return static_cast<uint32_t>(value);
+		}
+	}
+	return defaultValue;
 }
 
 std::string buildTimestamp()
@@ -84,6 +211,26 @@ void Logger::initialize(const Config& loggerConfig)
 	}
 
 	worker = std::thread(&Logger::threadMain, this);
+}
+
+void Logger::initializeFromEnv(const std::filesystem::path& fileName)
+{
+	const auto env = loadEnvFile(fileName);
+
+	Config loggerConfig;
+	const std::string globalLevel = getEnvString(env, "LOG_LEVEL", "info");
+	loggerConfig.level = parseLevel(globalLevel);
+	loggerConfig.consoleLevel = parseLevel(getEnvString(env, "LOG_CONSOLE_LEVEL", globalLevel));
+	loggerConfig.fileLevel = parseLevel(getEnvString(env, "LOG_FILE_LEVEL", globalLevel));
+	loggerConfig.console = getEnvBool(env, "LOG_TO_CONSOLE", true);
+	loggerConfig.file = getEnvBool(env, "LOG_TO_FILE", true);
+	loggerConfig.splitFilesByLevel = getEnvBool(env, "LOG_SPLIT_BY_LEVEL", true);
+	loggerConfig.directory = getEnvString(env, "LOG_DIR", "logs");
+	loggerConfig.fileName = getEnvString(env, "LOG_FILE", "logs/server.log");
+	loggerConfig.maxFileSizeMb = getEnvNumber(env, "LOG_MAX_FILE_SIZE_MB", 10);
+	loggerConfig.maxFiles = getEnvNumber(env, "LOG_MAX_FILES", 5);
+
+	initialize(loggerConfig);
 }
 
 void Logger::shutdown()

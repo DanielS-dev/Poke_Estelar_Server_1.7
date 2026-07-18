@@ -45,7 +45,38 @@ Escopo implementado:
 - macros `LOG_TRACE`, `LOG_DEBUG`, `LOG_INFO`, `LOG_WARN`, `LOG_ERROR`, `LOG_FATAL`
 
 Pendente para proximas etapas:
-- leitura do `.env`
+- integracao no build
+- integracao no startup/shutdown
+- migracao dos primeiros pontos da source
+
+## Etapa 2 - Leitura do .env
+
+Status: concluida
+
+Arquivos alterados:
+- `src/logger.hpp`
+- `src/logger.cpp`
+
+Escopo implementado:
+- `Logger::initializeFromEnv(...)`
+- leitura simples de arquivo `.env`
+- parse das chaves de log
+- fallback interno quando chave estiver ausente
+- comportamento seguro quando `.env` nao existir
+
+Chaves atendidas:
+- `LOG_LEVEL`
+- `LOG_CONSOLE_LEVEL`
+- `LOG_FILE_LEVEL`
+- `LOG_TO_CONSOLE`
+- `LOG_TO_FILE`
+- `LOG_SPLIT_BY_LEVEL`
+- `LOG_DIR`
+- `LOG_FILE`
+- `LOG_MAX_FILE_SIZE_MB`
+- `LOG_MAX_FILES`
+
+Pendente para proximas etapas:
 - integracao no build
 - integracao no startup/shutdown
 - migracao dos primeiros pontos da source
