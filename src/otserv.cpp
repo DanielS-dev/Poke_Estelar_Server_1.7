@@ -90,6 +90,7 @@ void mainLoader(ServiceManager* services)
 		startupErrorMessage("Unable to load " + configFile + "!");
 		return;
 	}
+	LOG_INFO("Startup", "Config loaded: " + configFile);
 
 #ifdef _WIN32
 	const std::string& defaultPriority = getString(ConfigManager::DEFAULT_PRIORITY);
@@ -110,6 +111,7 @@ void mainLoader(ServiceManager* services)
 		startupErrorMessage(e.what());
 		return;
 	}
+	LOG_INFO("Startup", "RSA key loaded");
 
 	std::cout << ">> Establishing database connection..." << std::flush;
 
@@ -119,6 +121,7 @@ void mainLoader(ServiceManager* services)
 	}
 
 	std::cout << " MySQL " << Database::getClientVersion() << std::endl;
+	LOG_INFO("Database", std::string("Connection established. Client version: ") + Database::getClientVersion());
 
 	// run database manager
 	std::cout << ">> Running database manager" << std::endl;
@@ -129,11 +132,14 @@ void mainLoader(ServiceManager* services)
 		return;
 	}
 	g_databaseTasks.start();
+	LOG_INFO("Database", "Database manager started");
 
 	DatabaseManager::updateDatabase();
+	LOG_INFO("Database", "Database update check finished");
 
 	if (getBoolean(ConfigManager::OPTIMIZE_DATABASE) && !DatabaseManager::optimizeTables()) {
 		std::cout << "> No tables were optimized." << std::endl;
+		LOG_WARN("Database", "No tables were optimized");
 	}
 
 	// load vocations
@@ -142,6 +148,7 @@ void mainLoader(ServiceManager* services)
 		startupErrorMessage("Unable to load vocations!");
 		return;
 	}
+	LOG_INFO("Startup", "Vocations loaded");
 
 	// load item data
 	std::cout << ">> Loading items... ";
@@ -152,41 +159,49 @@ void mainLoader(ServiceManager* services)
 	std::cout << fmt::format("OTB v{:d}.{:d}.{:d}", Item::items.majorVersion, Item::items.minorVersion,
 	                         Item::items.buildNumber)
 	          << std::endl;
+	LOG_INFO("Startup", fmt::format("Items OTB loaded: v{:d}.{:d}.{:d}", Item::items.majorVersion,
+	                                 Item::items.minorVersion, Item::items.buildNumber));
 
 	if (!Item::items.loadFromXml()) {
 		startupErrorMessage("Unable to load items (XML)!");
 		return;
 	}
+	LOG_INFO("Startup", "Items XML loaded");
 
 	std::cout << ">> Loading script systems" << std::endl;
 	if (!ScriptingManager::getInstance().loadScriptSystems()) {
 		startupErrorMessage("Failed to load script systems");
 		return;
 	}
+	LOG_INFO("Scripts", "Script systems loaded");
 
 	std::cout << ">> Loading lua scripts" << std::endl;
 	if (!g_scripts->loadScripts("scripts", false, false)) {
 		startupErrorMessage("Failed to load lua scripts");
 		return;
 	}
+	LOG_INFO("Scripts", "Lua scripts loaded");
 
 	std::cout << ">> Loading monsters" << std::endl;
 	if (!g_monsters.loadFromXml()) {
 		startupErrorMessage("Unable to load monsters!");
 		return;
 	}
+	LOG_INFO("Startup", "Monsters loaded from XML");
 
 	std::cout << ">> Loading lua monsters" << std::endl;
 	if (!g_scripts->loadScripts("monster", false, false)) {
 		startupErrorMessage("Failed to load lua monsters");
 		return;
 	}
+	LOG_INFO("Scripts", "Lua monster scripts loaded");
 
 	std::cout << ">> Loading outfits" << std::endl;
 	if (!Outfits::getInstance().loadFromXml()) {
 		startupErrorMessage("Unable to load outfits!");
 		return;
 	}
+	LOG_INFO("Startup", "Outfits loaded");
 
 	std::cout << ">> Checking world type... " << std::flush;
 	std::string worldType = boost::algorithm::to_lower_copy(getString(ConfigManager::WORLD_TYPE));
@@ -204,15 +219,18 @@ void mainLoader(ServiceManager* services)
 		return;
 	}
 	std::cout << boost::algorithm::to_upper_copy(worldType) << std::endl;
+	LOG_INFO("Startup", "World type set to: " + boost::algorithm::to_upper_copy(worldType));
 
 	std::cout << ">> Loading map" << std::endl;
 	if (!g_game.loadMainMap(getString(ConfigManager::MAP_NAME))) {
 		startupErrorMessage("Failed to load map");
 		return;
 	}
+	LOG_INFO("Startup", "Map loaded: " + getString(ConfigManager::MAP_NAME));
 
 	std::cout << ">> Initializing gamestate" << std::endl;
 	g_game.setGameState(GAME_STATE_INIT);
+	LOG_INFO("Startup", "Game state initialized");
 
 	// Game client protocols
 	services->add<ProtocolGame>(static_cast<uint16_t>(getNumber(ConfigManager::GAME_PORT)));
@@ -245,18 +263,22 @@ void mainLoader(ServiceManager* services)
 
 	tfs::iomarket::checkExpiredOffers();
 	tfs::iomarket::updateStatistics();
+	LOG_INFO("Startup", "House rent and market maintenance finished");
 
 	std::cout << ">> Loaded all modules, server starting up..." << std::endl;
+	LOG_INFO("Startup", "All modules loaded, starting game services");
 
 #ifndef _WIN32
 	if (getuid() == 0 || geteuid() == 0) {
 		std::cout << "> Warning: " << STATUS_SERVER_NAME
 		          << " has been executed as root user, please consider running it as a normal user." << std::endl;
+		LOG_WARN("Startup", std::string(STATUS_SERVER_NAME) + " is running as root user");
 	}
 #endif
 
 	g_game.start(services);
 	g_game.setGameState(GAME_STATE_NORMAL);
+	LOG_INFO("Startup", "Game state set to normal");
 	g_loaderSignal.notify_all();
 }
 

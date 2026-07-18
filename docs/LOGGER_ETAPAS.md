@@ -101,6 +101,37 @@ Resultado desta etapa:
 - falhas de startup agora entram no logger
 - o encerramento fecha a thread do logger de forma controlada
 
+## Etapa 5 - Primeira migracao de uso
+
+Status: concluida
+
+Arquivos alterados:
+- `src/otserv.cpp`
+- `docs/LOGGER_ETAPAS.md`
+
+Escopo implementado:
+- primeiros logs estruturados adicionados no bootstrap principal
+- migracao inicial focada em pontos de alto valor para debug
+- mantido o `std::cout` atual para nao alterar o fluxo visual do console nesta fase
+
+Pontos migrados:
+- carregamento de config
+- carregamento da chave RSA
+- conexao e preparacao inicial do banco
+- carregamento de vocations
+- carregamento de items OTB/XML
+- carregamento dos sistemas e scripts Lua
+- carregamento de monsters e outfits
+- definicao do world type
+- carregamento do mapa
+- inicializacao do gamestate
+- manutencao inicial de houses/market
+- transicao final para servidor online
+
+Resultado desta etapa:
+- o logger ja comeca a gerar rastreio real da subida do servidor
+- os logs ficam mais uteis para identificar em que fase o bootstrap falhou
+
 ## Etapa 3 - Build
 
 Status: concluida
