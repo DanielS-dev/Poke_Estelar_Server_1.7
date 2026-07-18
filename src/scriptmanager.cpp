@@ -43,13 +43,13 @@ ScriptingManager::~ScriptingManager()
 bool ScriptingManager::loadScriptSystems()
 {
 	if (g_luaEnvironment.loadFile("data/global.lua") == -1) {
-		LOG_STDOUT << "[Warning - ScriptingManager::loadScriptSystems] Can not load data/global.lua" << std::endl;
+		LOG_WARN_STREAM("Scripts") << "[Warning - ScriptingManager::loadScriptSystems] Can not load data/global.lua" << std::endl;
 	}
 
 	g_scripts = new Scripts();
-	LOG_STDOUT << ">> Loading lua libs" << std::endl;
+	LOG_INFO_STREAM("Scripts") << ">> Loading lua libs" << std::endl;
 	if (!g_scripts->loadScripts("scripts/lib", true, false)) {
-		LOG_STDOUT << "> ERROR: Unable to load lua libs!" << std::endl;
+		LOG_ERROR_STREAM("Scripts") << "> ERROR: Unable to load lua libs!" << std::endl;
 		return false;
 	}
 
@@ -57,7 +57,7 @@ bool ScriptingManager::loadScriptSystems()
 
 	g_weapons = new Weapons();
 	if (!g_weapons->loadFromXml()) {
-		LOG_STDOUT << "> ERROR: Unable to load weapons!" << std::endl;
+		LOG_ERROR_STREAM("Scripts") << "> ERROR: Unable to load weapons!" << std::endl;
 		return false;
 	}
 
@@ -65,7 +65,7 @@ bool ScriptingManager::loadScriptSystems()
 
 	g_spells = new Spells();
 	if (!g_spells->loadFromXml()) {
-		LOG_STDOUT << "> ERROR: Unable to load spells!" << std::endl;
+		LOG_ERROR_STREAM("Scripts") << "> ERROR: Unable to load spells!" << std::endl;
 		return false;
 	}
 
@@ -73,30 +73,30 @@ bool ScriptingManager::loadScriptSystems()
 
 	g_talkActions = new TalkActions();
 	if (!g_talkActions->loadFromXml()) {
-		LOG_STDOUT << "> ERROR: Unable to load talk actions!" << std::endl;
+		LOG_ERROR_STREAM("Scripts") << "> ERROR: Unable to load talk actions!" << std::endl;
 		return false;
 	}
 
 	g_moveEvents = new MoveEvents();
 	if (!g_moveEvents->loadFromXml()) {
-		LOG_STDOUT << "> ERROR: Unable to load move events!" << std::endl;
+		LOG_ERROR_STREAM("Scripts") << "> ERROR: Unable to load move events!" << std::endl;
 		return false;
 	}
 
 	g_creatureEvents = new CreatureEvents();
 	if (!g_creatureEvents->loadFromXml()) {
-		LOG_STDOUT << "> ERROR: Unable to load creature events!" << std::endl;
+		LOG_ERROR_STREAM("Scripts") << "> ERROR: Unable to load creature events!" << std::endl;
 		return false;
 	}
 
 	g_globalEvents = new GlobalEvents();
 	if (!g_globalEvents->loadFromXml()) {
-		LOG_STDOUT << "> ERROR: Unable to load global events!" << std::endl;
+		LOG_ERROR_STREAM("Scripts") << "> ERROR: Unable to load global events!" << std::endl;
 		return false;
 	}
 
 	if (!tfs::events::load()) {
-		LOG_STDOUT << "> ERROR: Unable to load events!" << std::endl;
+		LOG_ERROR_STREAM("Scripts") << "> ERROR: Unable to load events!" << std::endl;
 		return false;
 	}
 

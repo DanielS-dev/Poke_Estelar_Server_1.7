@@ -24,19 +24,19 @@ bool Outfits::loadFromXml()
 		}
 
 		if (!(attr = outfitNode.attribute("type"))) {
-			LOG_STDOUT << "[Warning - Outfits::loadFromXml] Missing outfit type." << std::endl;
+			LOG_WARN_STREAM("Outfit") << "[Warning - Outfits::loadFromXml] Missing outfit type." << std::endl;
 			continue;
 		}
 
 		uint16_t type = pugi::cast<uint16_t>(attr.value());
 		if (type > PLAYERSEX_LAST) {
-			LOG_STDOUT << "[Warning - Outfits::loadFromXml] Invalid outfit type " << type << "." << std::endl;
+			LOG_WARN_STREAM("Outfit") << "[Warning - Outfits::loadFromXml] Invalid outfit type " << type << "." << std::endl;
 			continue;
 		}
 
 		pugi::xml_attribute lookTypeAttribute = outfitNode.attribute("looktype");
 		if (!lookTypeAttribute) {
-			LOG_STDOUT << "[Warning - Outfits::loadFromXml] Missing looktype on outfit." << std::endl;
+			LOG_WARN_STREAM("Outfit") << "[Warning - Outfits::loadFromXml] Missing looktype on outfit." << std::endl;
 			continue;
 		}
 

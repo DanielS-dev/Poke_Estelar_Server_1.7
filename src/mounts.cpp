@@ -26,13 +26,13 @@ bool Mounts::loadFromXml()
 	for (auto mountNode : doc.child("mounts").children()) {
 		uint32_t nodeId = pugi::cast<uint32_t>(mountNode.attribute("id").value());
 		if (nodeId == 0 || nodeId > std::numeric_limits<uint16_t>::max()) {
-			LOG_STDOUT << "[Notice - Mounts::loadFromXml] Mount id \"" << nodeId << "\" is not within 1 and 65535 range"
+			LOG_INFO_STREAM("Mounts") << "[Notice - Mounts::loadFromXml] Mount id \"" << nodeId << "\" is not within 1 and 65535 range"
 			          << std::endl;
 			continue;
 		}
 
 		if (getMountByID(nodeId)) {
-			LOG_STDOUT << "[Notice - Mounts::loadFromXml] Duplicate mount with id: " << nodeId << std::endl;
+			LOG_INFO_STREAM("Mounts") << "[Notice - Mounts::loadFromXml] Duplicate mount with id: " << nodeId << std::endl;
 			continue;
 		}
 

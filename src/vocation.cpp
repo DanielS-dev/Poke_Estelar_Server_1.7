@@ -21,7 +21,7 @@ bool Vocations::loadFromXml(std::istream& is, std::string_view filename)
 	for (auto vocationNode : doc.child("vocations").children()) {
 		pugi::xml_attribute attr = vocationNode.attribute("id");
 		if (!attr) {
-			LOG_STDOUT << "[Warning - Vocations::loadFromXml] Missing vocation id" << std::endl;
+			LOG_WARN_STREAM("Vocation") << "[Warning - Vocations::loadFromXml] Missing vocation id" << std::endl;
 			continue;
 		}
 
@@ -71,7 +71,7 @@ bool Vocations::loadFromXml(std::istream& is, std::string_view filename)
 			} else if (caseInsensitiveEqual(attrName, "nopongkicktime")) {
 				voc.noPongKickTime = pugi::cast<uint32_t>(attrNode.value()) * 1000;
 			} else {
-				LOG_STDOUT << "[Notice - Vocations::loadFromXml] Unknown attribute: \"" << attrName
+				LOG_INFO_STREAM("Vocation") << "[Notice - Vocations::loadFromXml] Unknown attribute: \"" << attrName
 				          << "\" for vocation: " << voc.id << std::endl;
 			}
 		}
@@ -83,11 +83,11 @@ bool Vocations::loadFromXml(std::istream& is, std::string_view filename)
 					if (skillId <= SKILL_LAST) {
 						voc.skillMultipliers[skillId] = pugi::cast<double>(childNode.attribute("multiplier").value());
 					} else {
-						LOG_STDOUT << "[Notice - Vocations::loadFromXml] No valid skill id: " << skillId
+						LOG_INFO_STREAM("Vocation") << "[Notice - Vocations::loadFromXml] No valid skill id: " << skillId
 						          << " for vocation: " << voc.id << std::endl;
 					}
 				} else {
-					LOG_STDOUT << "[Notice - Vocations::loadFromXml] Missing skill id for vocation: " << voc.id
+					LOG_INFO_STREAM("Vocation") << "[Notice - Vocations::loadFromXml] Missing skill id for vocation: " << voc.id
 					          << std::endl;
 				}
 			} else if (caseInsensitiveEqual(childNode.name(), "formula")) {
@@ -116,7 +116,7 @@ Vocation* Vocations::getVocation(uint16_t id)
 {
 	auto it = vocationsMap.find(id);
 	if (it == vocationsMap.end()) {
-		LOG_STDOUT << "[Warning - Vocations::getVocation] Vocation " << id << " not found." << std::endl;
+		LOG_WARN_STREAM("Vocation") << "[Warning - Vocations::getVocation] Vocation " << id << " not found." << std::endl;
 		return nullptr;
 	}
 	return &it->second;

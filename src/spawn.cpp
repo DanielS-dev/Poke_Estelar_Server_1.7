@@ -46,12 +46,12 @@ bool Spawns::loadFromXml(const std::string& filename, bool isCalledByLua)
 		}
 
 		if (radius > 30) {
-			LOG_STDOUT << "[Warning - Spawns::loadFromXml] Radius size bigger than 30 at position: " << centerPos
+			LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] Radius size bigger than 30 at position: " << centerPos
 			          << ", consider lowering it." << std::endl;
 		}
 
 		if (!spawnNode.first_child()) {
-			LOG_STDOUT << "[Warning - Spawns::loadFromXml] Empty spawn at position: " << centerPos
+			LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] Empty spawn at position: " << centerPos
 			          << " with radius: " << radius << '.' << std::endl;
 			continue;
 		}
@@ -66,18 +66,18 @@ bool Spawns::loadFromXml(const std::string& filename, bool isCalledByLua)
 
 				int32_t interval = pugi::cast<int32_t>(childNode.attribute("spawntime").value()) * 1000;
 				if (interval < MINSPAWN_INTERVAL) {
-					LOG_STDOUT << "[Warning - Spawns::loadFromXml] " << pos << " spawntime can not be less than "
+					LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] " << pos << " spawntime can not be less than "
 					          << MINSPAWN_INTERVAL / 1000 << " seconds." << std::endl;
 					continue;
 				} else if (interval > MAXSPAWN_INTERVAL) {
-					LOG_STDOUT << "[Warning - Spawns::loadFromXml] " << pos << " spawntime can not be more than "
+					LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] " << pos << " spawntime can not be more than "
 					          << MAXSPAWN_INTERVAL / 1000 << " seconds." << std::endl;
 					continue;
 				}
 
 				size_t monstersCount = std::distance(childNode.children().begin(), childNode.children().end());
 				if (monstersCount == 0) {
-					LOG_STDOUT << "[Warning - Spawns::loadFromXml] " << pos << " empty monsters set." << std::endl;
+					LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] " << pos << " empty monsters set." << std::endl;
 					continue;
 				}
 
@@ -96,7 +96,7 @@ bool Spawns::loadFromXml(const std::string& filename, bool isCalledByLua)
 
 					MonsterType* mType = g_monsters.getMonsterType(nameAttribute.as_string());
 					if (!mType) {
-						LOG_STDOUT << "[Warning - Spawn::loadFromXml] " << pos << " can not find "
+						LOG_WARN_STREAM("Spawn") << "[Warning - Spawn::loadFromXml] " << pos << " can not find "
 						          << nameAttribute.as_string() << std::endl;
 						continue;
 					}
@@ -110,7 +110,7 @@ bool Spawns::loadFromXml(const std::string& filename, bool isCalledByLua)
 					if (chance + totalChance > 100) {
 						chance = 100 - totalChance;
 						totalChance = 100;
-						LOG_STDOUT << "[Warning - Spawns::loadFromXml] " << mType->name << ' ' << pos
+						LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] " << mType->name << ' ' << pos
 						          << " total chance for set can not be higher than 100." << std::endl;
 					} else {
 						totalChance += chance;
@@ -120,7 +120,7 @@ bool Spawns::loadFromXml(const std::string& filename, bool isCalledByLua)
 				}
 
 				if (sb.mTypes.empty()) {
-					LOG_STDOUT << "[Warning - Spawns::loadFromXml] " << pos << " empty monsters set." << std::endl;
+					LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] " << pos << " empty monsters set." << std::endl;
 					continue;
 				}
 
@@ -155,11 +155,11 @@ bool Spawns::loadFromXml(const std::string& filename, bool isCalledByLua)
 					spawn.addMonster(nameAttribute.as_string(), pos, dir, static_cast<uint32_t>(interval));
 				} else {
 					if (interval < MINSPAWN_INTERVAL) {
-						LOG_STDOUT << "[Warning - Spawns::loadFromXml] " << nameAttribute.as_string() << ' ' << pos
+						LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] " << nameAttribute.as_string() << ' ' << pos
 						          << " spawntime can not be less than " << MINSPAWN_INTERVAL / 1000 << " seconds."
 						          << std::endl;
 					} else {
-						LOG_STDOUT << "[Warning - Spawns::loadFromXml] " << nameAttribute.as_string() << ' ' << pos
+						LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::loadFromXml] " << nameAttribute.as_string() << ' ' << pos
 						          << " spawntime can not be more than " << MAXSPAWN_INTERVAL / 1000 << " seconds."
 						          << std::endl;
 					}
@@ -203,7 +203,7 @@ void Spawns::startup()
 
 	for (Npc* npc : npcList) {
 		if (!g_game.placeCreature(npc, npc->getMasterPos(), false, true)) {
-			LOG_STDOUT << "[Warning - Spawns::startup] Couldn't spawn npc \"" << npc->getName()
+			LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::startup] Couldn't spawn npc \"" << npc->getName()
 			          << "\" on position: " << npc->getMasterPos() << '.' << std::endl;
 			delete npc;
 		}
@@ -320,7 +320,7 @@ bool Spawn::spawnMonster(uint32_t spawnId, MonsterType* mType, const Position& p
 	if (startup) {
 		// No need to send out events to the surrounding since there is no one out there to listen!
 		if (!g_game.internalPlaceCreature(monster_ptr.get(), pos, true)) {
-			LOG_STDOUT << "[Warning - Spawns::startup] Couldn't spawn monster \"" << monster_ptr->getName()
+			LOG_WARN_STREAM("Spawn") << "[Warning - Spawns::startup] Couldn't spawn monster \"" << monster_ptr->getName()
 			          << "\" on position: " << pos << '.' << std::endl;
 			return false;
 		}
@@ -408,7 +408,7 @@ bool Spawn::addMonster(const std::string& name, const Position& pos, Direction d
 {
 	MonsterType* mType = g_monsters.getMonsterType(name);
 	if (!mType) {
-		LOG_STDOUT << "[Warning - Spawn::addMonster] Can not find " << name << std::endl;
+		LOG_WARN_STREAM("Spawn") << "[Warning - Spawn::addMonster] Can not find " << name << std::endl;
 		return false;
 	}
 

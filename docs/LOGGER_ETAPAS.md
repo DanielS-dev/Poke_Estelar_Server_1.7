@@ -190,6 +190,60 @@ Resultado desta etapa:
 - a source inteira passa a gerar rastreio centralizado sem precisar migracao manual arquivo por arquivo
 - os logs antigos continuam aparecendo no console e agora tambem entram no sistema de arquivos do logger
 
+## Etapa 7 - Loaders principais
+
+Status: concluida
+
+Arquivos alterados:
+- `src/logger.hpp`
+- `src/scriptmanager.cpp`
+- `src/script.cpp`
+- `src/items.cpp`
+- `src/monsters.cpp`
+- `src/movement.cpp`
+- `src/spells.cpp`
+- `src/weapons.cpp`
+- `src/npc.cpp`
+- `src/outfit.cpp`
+- `src/vocation.cpp`
+- `src/spawn.cpp`
+- `src/chat.cpp`
+- `src/baseevents.cpp`
+- `src/events.cpp`
+- `src/globalevent.cpp`
+- `src/mounts.cpp`
+- `docs/LOGGER_ETAPAS.md`
+
+Escopo implementado:
+- criados macros de stream por nivel e categoria:
+  `LOG_TRACE_STREAM`, `LOG_DEBUG_STREAM`, `LOG_INFO_STREAM`, `LOG_WARN_STREAM`, `LOG_ERROR_STREAM`, `LOG_FATAL_STREAM`
+- migracao completa dos loaders principais para uso direto do logger
+- remocao dos `LOG_STDOUT`, `LOG_STDERR` e `LOG_STDLOG` desses loaders
+- categorizacao por modulo com niveis adequados para carga, aviso e erro
+
+Loaders cobertos:
+- script systems e libs
+- scripts lua
+- items
+- monsters
+- movement
+- spells
+- weapons
+- npc
+- outfit
+- vocation
+- spawn
+- chat
+- base events
+- events
+- global events
+- mounts
+
+Resultado desta etapa:
+- os loaders principais passam a usar somente o sistema de logger
+- os avisos e erros desses carregadores ficam categorizados por modulo
+- a saida do console fica mais previsivel e o arquivo de log ganha rastreio melhor desses pontos
+
 ## Etapa 3 - Build
 
 Status: concluida

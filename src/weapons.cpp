@@ -101,7 +101,7 @@ bool Weapons::registerEvent(Event_ptr event, const pugi::xml_node&)
 
 	auto result = weapons.emplace(weapon->getID(), weapon);
 	if (!result.second) {
-		LOG_STDOUT << "[Warning - Weapons::registerEvent] Duplicate registered item with id: " << weapon->getID()
+		LOG_WARN_STREAM("Weapons") << "[Warning - Weapons::registerEvent] Duplicate registered item with id: " << weapon->getID()
 		          << std::endl;
 	}
 	return result.second;
@@ -130,7 +130,7 @@ bool Weapon::configureEvent(const pugi::xml_node& node)
 {
 	pugi::xml_attribute attr;
 	if (!(attr = node.attribute("id"))) {
-		LOG_STDOUT << "[Error - Weapon::configureEvent] Weapon without id." << std::endl;
+		LOG_ERROR_STREAM("Weapons") << "[Error - Weapon::configureEvent] Weapon without id." << std::endl;
 		return false;
 	}
 	id = pugi::cast<uint16_t>(attr.value());
@@ -166,7 +166,7 @@ bool Weapon::configureEvent(const pugi::xml_node& node)
 	if ((attr = node.attribute("action"))) {
 		action = getWeaponAction(boost::algorithm::to_lower_copy<std::string>(attr.as_string()));
 		if (action == WEAPONACTION_NONE) {
-			LOG_STDOUT << "[Warning - Weapon::configureEvent] Unknown action " << attr.as_string() << std::endl;
+			LOG_WARN_STREAM("Weapons") << "[Warning - Weapon::configureEvent] Unknown action " << attr.as_string() << std::endl;
 		}
 	}
 
@@ -506,7 +506,7 @@ bool Weapon::executeUseWeapon(Player* player, const LuaVariant& var) const
 {
 	// onUseWeapon(player, var)
 	if (!tfs::lua::reserveScriptEnv()) {
-		LOG_STDOUT << "[Error - Weapon::executeUseWeapon] Call stack overflow" << std::endl;
+		LOG_ERROR_STREAM("Weapons") << "[Error - Weapon::executeUseWeapon] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -932,7 +932,7 @@ bool WeaponWand::configureEvent(const pugi::xml_node& node)
 	} else if (tmpStrValue == "holy") {
 		params.combatType = COMBAT_HOLYDAMAGE;
 	} else {
-		LOG_STDOUT << "[Warning - WeaponWand::configureEvent] Type \"" << attr.as_string() << "\" does not exist."
+		LOG_WARN_STREAM("Weapons") << "[Warning - WeaponWand::configureEvent] Type \"" << attr.as_string() << "\" does not exist."
 		          << std::endl;
 	}
 	return true;
