@@ -65,6 +65,7 @@ function doAddPokeball(cid, name, level, boost, ballKey, dp, msg, teratype)
 			--addBall:setAttribute("pokeExperience", getNeededExp(level))
 			addBall:setCustomAttribute("pokeMaxHealth", maxHealth)
 			addBall:setCustomAttribute("pokeHealth", maxHealth)
+			addBall:setCustomAttribute("pokeIsDead", 0)
 			addBall:setCustomAttribute("evhp", 0)
 			addBall:setCustomAttribute("evatk", 0)
 			addBall:setCustomAttribute("evdef", 0)
@@ -366,9 +367,16 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 		return false
 	end
 
+	if ball:getCustomAttribute("pokeIsDead") == 1 then
+		player:sendCancelMessage("Sorry, not possible. Your summon is dead.")
+		ball:setCustomAttribute("isBeingUsed", 0)
+		return true
+	end
+
 	local health = ball:getCustomAttribute("pokeHealth") or 0
 	if health <= 0 then
 		player:sendCancelMessage("Sorry, not possible. Your summon is dead.")
+		ball:setCustomAttribute("pokeIsDead", 1)
 		ball:setCustomAttribute("isBeingUsed", 0)
 		return true
 	end	
@@ -393,8 +401,10 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 	player:addSummon(monster)
 	monster:setDirection(ball:getCustomAttribute("pokeLookDir") or DIRECTION_SOUTH)
 	ball:setCustomAttribute("summonId", monster:getId())
+	ball:setCustomAttribute("pokeIsDead", 0)
 	monster:setTarget(nil)
 	monster:setFollowCreature(player)
+	monster:registerEvent("PokeSummonDeath")
 
 	local maxHealth = ball:getCustomAttribute("pokeMaxHealth") or monster:getMaxHealth()
 	monster:setMaxHealth(maxHealth)
