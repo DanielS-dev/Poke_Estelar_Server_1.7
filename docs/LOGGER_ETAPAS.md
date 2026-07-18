@@ -77,6 +77,24 @@ Chaves atendidas:
 - `LOG_MAX_FILES`
 
 Pendente para proximas etapas:
-- integracao no build
+- integracao no startup/shutdown
+- migracao dos primeiros pontos da source
+
+## Etapa 3 - Build
+
+Status: concluida
+
+Arquivos alterados:
+- `src/CMakeLists.txt`
+- `vc17/theforgottenserver.vcxproj`
+- `vc17/theforgottenserver.vcxproj.filters`
+
+Escopo implementado:
+- `logger.cpp` adicionado na lista de sources do build
+- `logger.hpp` adicionado na lista de headers do build
+- projeto `vc17` atualizado para reconhecer os novos arquivos
+- filtros do Visual Studio atualizados para exibir os arquivos no grupo correto
+
+Pendente para proximas etapas:
 - integracao no startup/shutdown
 - migracao dos primeiros pontos da source
