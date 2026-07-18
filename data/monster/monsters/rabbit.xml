@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<monster name="Rabbit" nameDescription="a rabbit" race="blood" experience="0" speed="180" manacost="220" raceId="74">
-	<health now="15" max="15" />
+<monster name="Rabbit" nameDescription="a rabbit" race="blood" experience="25" speed="180" manacost="220" raceId="74">
+	<!--
+		Base de estrutura para Pokemon no TFS 1.7.
+		Tags antigas como level, moves, evolutions, race2, portraitid, shiny/mega e similares
+		devem ser adicionadas depois que a source estiver preparada para ler esses campos.
+	-->
+	<health now="45" max="45" />
 	<look type="74" corpse="6017" />
 	<targetchange interval="5000" chance="0" />
 	<flags>
 		<flag summonable="1" />
 		<flag attackable="1" />
-		<flag hostile="0" />
+		<flag hostile="1" />
 		<flag illusionable="1" />
 		<flag convinceable="1" />
 		<flag pushable="1" />
@@ -14,14 +19,36 @@
 		<flag canpushcreatures="0" />
 		<flag targetdistance="1" />
 		<flag staticattack="90" />
-		<flag runonhealth="15" />
+		<flag runonhealth="0" />
 		<flag canwalkonenergy="0" />
 		<flag canwalkonfire="0" />
 		<flag canwalkonpoison="0" />
 		<flag catchchance="333" />
 	</flags>
+	<script>
+		<event name="MonsterHealthChange" />
+		<event name="CorpseLevel" />
+		<event name="CorpseLoot" />
+	</script>
 	<bestiary class="Mammal" prowess="10" expertise="100" mastery="250" charmPoints="10" difficulty="trivial" occurrence="common" locations="Rabbit Locations..." />
-	<defenses armor="1" defense="1" />
+	<attacks>
+		<attack name="melee" interval="2000" min="-8" max="-15" />
+	</attacks>
+	<defenses armor="2" defense="5" />
+	<elements>
+		<element physicalPercent="0" />
+		<element earthPercent="0" />
+		<element firePercent="0" />
+		<element energyPercent="0" />
+		<element icePercent="0" />
+	</elements>
+	<immunities>
+		<immunity paralyze="0" />
+		<immunity invisible="1" />
+	</immunities>
+	<voices interval="5000" chance="10">
+		<voice sentence="Rabbit!" />
+	</voices>
 	<loot>
 		<item name="meat" countmax="2" chance="82000" />
 		<item id="2684" countmax="2" chance="10000" /><!-- carrot -->
