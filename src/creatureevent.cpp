@@ -47,7 +47,7 @@ bool CreatureEvents::registerEvent(Event_ptr event, const pugi::xml_node&)
 	CreatureEvent_ptr creatureEvent{
 	    static_cast<CreatureEvent*>(event.release())}; // event is guaranteed to be a CreatureEvent
 	if (creatureEvent->getEventType() == CREATURE_EVENT_NONE) {
-		std::cout << "Error: [CreatureEvents::registerEvent] Trying to register event without type!" << std::endl;
+		LOG_STDOUT << "Error: [CreatureEvents::registerEvent] Trying to register event without type!" << std::endl;
 		return false;
 	}
 
@@ -70,7 +70,7 @@ bool CreatureEvents::registerLuaEvent(CreatureEvent* event)
 {
 	CreatureEvent_ptr creatureEvent{event};
 	if (creatureEvent->getEventType() == CREATURE_EVENT_NONE) {
-		std::cout << "Error: [CreatureEvents::registerLuaEvent] Trying to register event without type!" << std::endl;
+		LOG_STDOUT << "Error: [CreatureEvents::registerLuaEvent] Trying to register event without type!" << std::endl;
 		return false;
 	}
 
@@ -159,7 +159,7 @@ bool CreatureEvent::configureEvent(const pugi::xml_node& node)
 	// Name that will be used in monster xml files and lua function to register events to reference this event
 	pugi::xml_attribute nameAttribute = node.attribute("name");
 	if (!nameAttribute) {
-		std::cout << "[Error - CreatureEvent::configureEvent] Missing name for creature event" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::configureEvent] Missing name for creature event" << std::endl;
 		return false;
 	}
 
@@ -167,7 +167,7 @@ bool CreatureEvent::configureEvent(const pugi::xml_node& node)
 
 	pugi::xml_attribute typeAttribute = node.attribute("type");
 	if (!typeAttribute) {
-		std::cout << "[Error - CreatureEvent::configureEvent] Missing type for creature event: " << eventName
+		LOG_STDOUT << "[Error - CreatureEvent::configureEvent] Missing type for creature event: " << eventName
 		          << std::endl;
 		return false;
 	}
@@ -200,7 +200,7 @@ bool CreatureEvent::configureEvent(const pugi::xml_node& node)
 	} else if (tmpStr == "extendedopcode") {
 		type = CREATURE_EVENT_EXTENDED_OPCODE;
 	} else {
-		std::cout << "[Error - CreatureEvent::configureEvent] Invalid type for creature event: " << eventName
+		LOG_STDOUT << "[Error - CreatureEvent::configureEvent] Invalid type for creature event: " << eventName
 		          << std::endl;
 		return false;
 	}
@@ -278,7 +278,7 @@ bool CreatureEvent::executeOnLogin(Player* player) const
 {
 	// onLogin(player)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeOnLogin] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeOnLogin] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -297,7 +297,7 @@ bool CreatureEvent::executeOnLogout(Player* player) const
 {
 	// onLogout(player)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeOnLogout] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeOnLogout] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -316,7 +316,7 @@ void CreatureEvent::executeOnReconnect(Player* player) const
 {
 	// onReconnect(player)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeOnReconnect] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeOnReconnect] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -335,7 +335,7 @@ bool CreatureEvent::executeOnThink(Creature* creature, uint32_t interval)
 {
 	// onThink(creature, interval)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeOnThink] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeOnThink] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -356,7 +356,7 @@ bool CreatureEvent::executeOnPrepareDeath(Creature* creature, Creature* killer)
 {
 	// onPrepareDeath(creature, killer)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeOnPrepareDeath] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeOnPrepareDeath] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -385,7 +385,7 @@ bool CreatureEvent::executeOnDeath(Creature* creature, Item* corpse, Creature* k
 {
 	// onDeath(creature, corpse, killer, mostDamageKiller, lastHitUnjustified, mostDamageUnjustified)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeOnDeath] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeOnDeath] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -424,7 +424,7 @@ bool CreatureEvent::executeAdvance(Player* player, skills_t skill, uint32_t oldL
 {
 	// onAdvance(player, skill, oldLevel, newLevel)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeAdvance] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeAdvance] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -447,7 +447,7 @@ void CreatureEvent::executeOnKill(Creature* creature, Creature* target)
 {
 	// onKill(creature, target)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeOnKill] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeOnKill] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -468,7 +468,7 @@ void CreatureEvent::executeModalWindow(Player* player, uint32_t modalWindowId, u
 {
 	// onModalWindow(player, modalWindowId, buttonId, choiceId)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeModalWindow] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeModalWindow] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -492,7 +492,7 @@ bool CreatureEvent::executeTextEdit(Player* player, Item* item, std::string_view
 {
 	// onTextEdit(player, item, text, windowTextId)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeTextEdit] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeTextEdit] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -530,7 +530,7 @@ void CreatureEvent::executeHealthChange(Creature* creature, Creature* attacker, 
 {
 	// onHealthChange(creature, attacker, primaryDamage, primaryType, secondaryDamage, secondaryType, origin)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeHealthChange] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeHealthChange] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -573,7 +573,7 @@ void CreatureEvent::executeManaChange(Creature* creature, Creature* attacker, Co
 {
 	// onManaChange(creature, attacker, primaryDamage, primaryType, secondaryDamage, secondaryType, origin)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeManaChange] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeManaChange] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -611,7 +611,7 @@ void CreatureEvent::executeExtendedOpcode(Player* player, uint8_t opcode, const 
 {
 	// onExtendedOpcode(player, opcode, buffer)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CreatureEvent::executeExtendedOpcode] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CreatureEvent::executeExtendedOpcode] Call stack overflow" << std::endl;
 		return;
 	}
 

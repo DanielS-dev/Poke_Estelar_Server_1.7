@@ -137,7 +137,7 @@ public:
 	{
 		auto it = listNames.find(column);
 		if (it == listNames.end()) {
-			std::cout << "[Error - DBResult::getNumber] Column '" << column << "' doesn't exist in the result set"
+			LOG_STDOUT << "[Error - DBResult::getNumber] Column '" << column << "' doesn't exist in the result set"
 			          << std::endl;
 			return {};
 		}

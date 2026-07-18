@@ -154,7 +154,7 @@ void Game::saveGameState()
 		setGameState(GAME_STATE_MAINTAIN);
 	}
 
-	std::cout << "Saving server..." << std::endl;
+	LOG_STDOUT << "Saving server..." << std::endl;
 
 	for (const auto& it : players) {
 		it.second->loginPosition = it.second->getPosition();
@@ -1889,7 +1889,7 @@ bool Game::playerBroadcastMessage(Player* player, const std::string& text) const
 		return false;
 	}
 
-	std::cout << "> " << player->getName() << " broadcasted: \"" << text << "\"." << std::endl;
+	LOG_STDOUT << "> " << player->getName() << " broadcasted: \"" << text << "\"." << std::endl;
 
 	for (const auto& it : players) {
 		it.second->sendPrivateMessage(player, TALKTYPE_BROADCAST, text);
@@ -4759,7 +4759,7 @@ void Game::internalDecayItem(Item* item)
 		}
 		ReturnValue ret = internalRemoveItem(item);
 		if (ret != RETURNVALUE_NOERROR) {
-			std::cout << "[Debug - Game::internalDecayItem] internalDecayItem failed, error code: "
+			LOG_STDOUT << "[Debug - Game::internalDecayItem] internalDecayItem failed, error code: "
 			          << static_cast<uint32_t>(ret) << ", item id: " << item->getID() << std::endl;
 		}
 	}
@@ -4810,7 +4810,7 @@ void Game::checkDecay()
 
 void Game::shutdown()
 {
-	std::cout << "Shutting down..." << std::flush;
+	LOG_STDOUT << "Shutting down..." << std::flush;
 
 	g_scheduler.shutdown();
 	g_databaseTasks.shutdown();
@@ -4825,7 +4825,7 @@ void Game::shutdown()
 
 	ConnectionManager::getInstance().closeAll();
 
-	std::cout << " done!" << std::endl;
+	LOG_STDOUT << " done!" << std::endl;
 }
 
 void Game::cleanup()
@@ -4858,7 +4858,7 @@ void Game::ReleaseItem(Item* item) { ToReleaseItems.push_back(item); }
 
 void Game::broadcastMessage(const std::string& text, MessageClasses type) const
 {
-	std::cout << "> Broadcasted message: \"" << text << "\"." << std::endl;
+	LOG_STDOUT << "> Broadcasted message: \"" << text << "\"." << std::endl;
 	for (const auto& it : players) {
 		it.second->sendTextMessage(type, text);
 	}
@@ -5823,7 +5823,7 @@ bool Game::addUniqueItem(uint16_t uniqueId, Item* item)
 {
 	auto result = uniqueItems.emplace(uniqueId, item);
 	if (!result.second) {
-		std::cout << "Duplicate unique id: " << uniqueId << std::endl;
+		LOG_STDOUT << "Duplicate unique id: " << uniqueId << std::endl;
 	}
 	return result.second;
 }
@@ -5869,10 +5869,10 @@ bool Game::reload(ReloadTypes_t reloadType)
 
 		case RELOAD_TYPE_SPELLS: {
 			if (!g_spells->reload()) {
-				std::cout << "[Error - Game::reload] Failed to reload spells." << std::endl;
+				LOG_STDOUT << "[Error - Game::reload] Failed to reload spells." << std::endl;
 				std::terminate();
 			} else if (!g_monsters.reload()) {
-				std::cout << "[Error - Game::reload] Failed to reload monsters." << std::endl;
+				LOG_STDOUT << "[Error - Game::reload] Failed to reload monsters." << std::endl;
 				std::terminate();
 			}
 			return true;
@@ -5912,10 +5912,10 @@ bool Game::reload(ReloadTypes_t reloadType)
 
 		default: {
 			if (!g_spells->reload()) {
-				std::cout << "[Error - Game::reload] Failed to reload spells." << std::endl;
+				LOG_STDOUT << "[Error - Game::reload] Failed to reload spells." << std::endl;
 				std::terminate();
 			} else if (!g_monsters.reload()) {
-				std::cout << "[Error - Game::reload] Failed to reload monsters." << std::endl;
+				LOG_STDOUT << "[Error - Game::reload] Failed to reload monsters." << std::endl;
 				std::terminate();
 			}
 

@@ -6,9 +6,13 @@
 #include <deque>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <mutex>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <string_view>
+#include <streambuf>
 #include <thread>
 #include <unordered_map>
 
@@ -25,6 +29,8 @@ enum class LogLevel : uint8_t {
 class Logger
 {
 	public:
+		class Stream;
+
 		struct Config {
 			LogLevel level = LogLevel::Info;
 			LogLevel consoleLevel = LogLevel::Info;
@@ -32,6 +38,12 @@ class Logger
 			bool console = true;
 			bool file = true;
 			bool splitFilesByLevel = true;
+			bool captureStandardStreams = true;
+			bool consoleCompact = true;
+			bool consoleShowCategory = false;
+			bool consoleShowLegacyInfo = false;
+			bool fileIncludeTimestamp = true;
+			bool fileIncludeSource = true;
 			std::filesystem::path fileName = "logs/server.log";
 			std::filesystem::path directory = "logs";
 			uint32_t maxFileSizeMb = 10;
@@ -49,6 +61,7 @@ class Logger
 
 		bool shouldLog(LogLevel level) const;
 		void log(LogLevel level, std::string_view category, const std::string& message, const char* file, int line);
+		[[nodiscard]] Stream stream(LogLevel level, std::string_view category, const char* file, int line) const;
 
 	private:
 		struct LogMessage {
@@ -60,6 +73,54 @@ class Logger
 			std::string timestamp;
 		};
 
+		class RedirectStreamBuffer;
+
+	public:
+		class Stream
+		{
+			public:
+				Stream(LogLevel logLevel, std::string logCategory, const char* sourceFile, int sourceLine);
+				Stream(const Stream&) = delete;
+				Stream& operator=(const Stream&) = delete;
+				Stream(Stream&& other) noexcept;
+				Stream& operator=(Stream&& other) noexcept = delete;
+				~Stream();
+
+				template <typename T>
+				Stream& operator<<(const T& value)
+				{
+					buffer << value;
+					return *this;
+				}
+
+				Stream& operator<<(std::ostream& (*manipulator)(std::ostream&))
+				{
+					manipulator(buffer);
+					return *this;
+				}
+
+				Stream& operator<<(std::ios& (*manipulator)(std::ios&))
+				{
+					manipulator(buffer);
+					return *this;
+				}
+
+				Stream& operator<<(std::ios_base& (*manipulator)(std::ios_base&))
+				{
+					manipulator(buffer);
+					return *this;
+				}
+
+			private:
+				LogLevel level;
+				std::string category;
+				const char* file;
+				int line;
+				std::ostringstream buffer;
+				bool active = true;
+		};
+
+	private:
 		Logger() = default;
 		~Logger();
 
@@ -71,16 +132,29 @@ class Logger
 		bool openFileStream(std::ofstream& stream, const std::filesystem::path& fileName);
 		void closeStreams();
 		void disableFileLogging(const std::string& reason);
+		void attachStandardStreams();
+		void detachStandardStreams();
+		void flushRedirectedStreams();
+		void writeConsoleLine(LogLevel level, const std::string& line);
+		std::string buildConsoleMessage(const LogMessage& message) const;
+		std::string buildFileMessage(const LogMessage& message) const;
 
 		Config config;
 		std::ofstream fileStream;
 		std::unordered_map<LogLevel, std::ofstream> levelFileStreams;
 		std::deque<LogMessage> queue;
 		std::thread worker;
+		std::unique_ptr<RedirectStreamBuffer> coutRedirect;
+		std::unique_ptr<RedirectStreamBuffer> cerrRedirect;
+		std::unique_ptr<RedirectStreamBuffer> clogRedirect;
+		std::streambuf* originalCoutBuffer = nullptr;
+		std::streambuf* originalCerrBuffer = nullptr;
+		std::streambuf* originalClogBuffer = nullptr;
 		mutable std::mutex mutex;
 		std::condition_variable signal;
 		bool running = false;
 		bool initialized = false;
+		bool standardStreamsAttached = false;
 	};
 
 #define LOG_TRACE(category, message) Logger::getInstance().log(LogLevel::Trace, category, message, __FILE__, __LINE__)
@@ -89,5 +163,8 @@ class Logger
 #define LOG_WARN(category, message) Logger::getInstance().log(LogLevel::Warn, category, message, __FILE__, __LINE__)
 #define LOG_ERROR(category, message) Logger::getInstance().log(LogLevel::Error, category, message, __FILE__, __LINE__)
 #define LOG_FATAL(category, message) Logger::getInstance().log(LogLevel::Fatal, category, message, __FILE__, __LINE__)
+#define LOG_STDOUT Logger::getInstance().stream(LogLevel::Info, "Legacy", __FILE__, __LINE__)
+#define LOG_STDERR Logger::getInstance().stream(LogLevel::Error, "Legacy", __FILE__, __LINE__)
+#define LOG_STDLOG Logger::getInstance().stream(LogLevel::Debug, "Legacy", __FILE__, __LINE__)
 
 #endif

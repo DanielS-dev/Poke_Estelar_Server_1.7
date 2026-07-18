@@ -5,8 +5,6 @@
 #include <boost/asio/dispatch.hpp>
 #include <boost/beast/http/read.hpp>
 #include <boost/beast/http/write.hpp>
-#include <fmt/core.h>
-
 namespace asio = boost::asio;
 namespace beast = boost::beast;
 
@@ -68,7 +66,7 @@ void Session::on_read(beast::error_code ec, size_t /*bytes_transferred*/)
 	}
 
 	if (ec) {
-		fmt::print(stderr, "{}: {}\n", __FUNCTION__, ec.message());
+		LOG_ERROR("HTTP", std::string(__FUNCTION__) + ": " + ec.message());
 		return;
 	};
 
@@ -79,7 +77,7 @@ void Session::on_read(beast::error_code ec, size_t /*bytes_transferred*/)
 void Session::on_write(beast::error_code ec, size_t /*bytes_transferred*/, bool keep_alive)
 {
 	if (ec) {
-		fmt::print(stderr, "{}: {}\n", __FUNCTION__, ec.message());
+		LOG_ERROR("HTTP", std::string(__FUNCTION__) + ": " + ec.message());
 		return;
 	};
 

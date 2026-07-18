@@ -339,7 +339,7 @@ void ScriptEnvironment::insertItem(uint32_t uid, Item* item)
 {
 	auto result = localMap.emplace(uid, item);
 	if (!result.second) {
-		std::cout << "\nLua Script Error: Thing uid already taken.";
+		LOG_STDOUT << "\nLua Script Error: Thing uid already taken.";
 	}
 }
 
@@ -638,30 +638,30 @@ void tfs::lua::reportError(std::string_view function, std::string_view error_des
 {
 	auto [scriptId, luaScriptInterface, callbackId, timerEvent] = getScriptEnv()->getEventInfo();
 
-	std::cout << "\nLua Script Error: ";
+	LOG_STDOUT << "\nLua Script Error: ";
 
 	if (luaScriptInterface) {
-		std::cout << '[' << luaScriptInterface->getInterfaceName() << "]\n";
+		LOG_STDOUT << '[' << luaScriptInterface->getInterfaceName() << "]\n";
 
 		if (timerEvent) {
-			std::cout << "in a timer event called from:\n";
+			LOG_STDOUT << "in a timer event called from:\n";
 		}
 
 		if (callbackId) {
-			std::cout << "in callback: " << luaScriptInterface->getFileById(callbackId) << '\n';
+			LOG_STDOUT << "in callback: " << luaScriptInterface->getFileById(callbackId) << '\n';
 		}
 
-		std::cout << luaScriptInterface->getFileById(scriptId) << '\n';
+		LOG_STDOUT << luaScriptInterface->getFileById(scriptId) << '\n';
 	}
 
 	if (!function.empty()) {
-		std::cout << function << "(). ";
+		LOG_STDOUT << function << "(). ";
 	}
 
 	if (L && stack_trace) {
-		std::cout << getStackTrace(L, error_desc) << '\n';
+		LOG_STDOUT << getStackTrace(L, error_desc) << '\n';
 	} else {
-		std::cout << error_desc << '\n';
+		LOG_STDOUT << error_desc << '\n';
 	}
 }
 
@@ -4606,7 +4606,7 @@ int LuaScriptInterface::luaGameLoadMap(lua_State* L)
 			g_game.loadMap(path, true);
 		} catch (const std::exception& e) {
 			// FIXME: Should only catch some exceptions
-			std::cout << "[Error - LuaScriptInterface::luaGameLoadMap] Failed to load map: " << e.what() << '\n';
+			LOG_STDOUT << "[Error - LuaScriptInterface::luaGameLoadMap] Failed to load map: " << e.what() << '\n';
 		}
 	});
 	return 0;
@@ -11477,7 +11477,7 @@ int LuaScriptInterface::luaMonsterGetType(lua_State* L)
     
     if (!monster) {
         // Se entrar aqui, o Lua chamou a função passando algo que o C++ não reconhece como Monstro!
-        std::cout << "[DEBUG MonsterGetType] Erro: O objeto passado no Lua NAO e um monstro valido!" << std::endl;
+        LOG_STDOUT << "[DEBUG MonsterGetType] Erro: O objeto passado no Lua NAO e um monstro valido!" << std::endl;
         lua_pushnil(L);
         return 1;
     }
@@ -14897,7 +14897,7 @@ int LuaScriptInterface::luaMonsterTypeCombatImmunities(lua_State* L)
 				monsterType->info.damageImmunities |= COMBAT_MANADRAIN;
 				tfs::lua::pushBoolean(L, true);
 			} else {
-				std::cout << "[Warning - Monsters::loadMonster] Unknown immunity name " << immunity
+				LOG_STDOUT << "[Warning - Monsters::loadMonster] Unknown immunity name " << immunity
 				          << " for monster: " << monsterType->name << '\n';
 				lua_pushnil(L);
 			}
@@ -14957,7 +14957,7 @@ int LuaScriptInterface::luaMonsterTypeConditionImmunities(lua_State* L)
 				monsterType->info.conditionImmunities |= CONDITION_BLEEDING;
 				tfs::lua::pushBoolean(L, true);
 			} else {
-				std::cout << "[Warning - Monsters::loadMonster] Unknown immunity name " << immunity
+				LOG_STDOUT << "[Warning - Monsters::loadMonster] Unknown immunity name " << immunity
 				          << " for monster: " << monsterType->name << '\n';
 				lua_pushnil(L);
 			}
@@ -15009,8 +15009,8 @@ int LuaScriptInterface::luaMonsterTypeAddAttack(lua_State* L)
 			if (g_monsters.deserializeSpell(spell, sb, monsterType->name)) {
 				monsterType->info.attackSpells.push_back(std::move(sb));
 			} else {
-				std::cout << monsterType->name << '\n';
-				std::cout << "[Warning - Monsters::loadMonster] Cant load spell. " << spell->name << '\n';
+				LOG_STDOUT << monsterType->name << '\n';
+				LOG_STDOUT << "[Warning - Monsters::loadMonster] Cant load spell. " << spell->name << '\n';
 			}
 		} else {
 			lua_pushnil(L);
@@ -15062,8 +15062,8 @@ int LuaScriptInterface::luaMonsterTypeAddDefense(lua_State* L)
 			if (g_monsters.deserializeSpell(spell, sb, monsterType->name)) {
 				monsterType->info.defenseSpells.push_back(std::move(sb));
 			} else {
-				std::cout << monsterType->name << '\n';
-				std::cout << "[Warning - Monsters::loadMonster] Cant load spell. " << spell->name << '\n';
+				LOG_STDOUT << monsterType->name << '\n';
+				LOG_STDOUT << "[Warning - Monsters::loadMonster] Cant load spell. " << spell->name << '\n';
 			}
 		} else {
 			lua_pushnil(L);
@@ -15371,7 +15371,7 @@ int LuaScriptInterface::luaMonsterTypeRace(lua_State* L)
 			} else if (race == "energy") {
 				monsterType->info.race = RACE_ENERGY;
 			} else {
-				std::cout << "[Warning - Monsters::loadMonster] Unknown race type " << race << ".\n";
+				LOG_STDOUT << "[Warning - Monsters::loadMonster] Unknown race type " << race << ".\n";
 				lua_pushnil(L);
 				return 1;
 			}
@@ -15604,7 +15604,7 @@ int LuaScriptInterface::luaMonsterTypeBestiaryInfo(lua_State* L)
 		return 1;
 	}
 
-	std::cout << "[Warning - LuaScriptInterface::luaMonsterTypeBestiaryInfo] bestiaryInfo must be a table.\n";
+	LOG_STDOUT << "[Warning - LuaScriptInterface::luaMonsterTypeBestiaryInfo] bestiaryInfo must be a table.\n";
 	lua_pushnil(L);
 	return 1;
 }
@@ -15656,13 +15656,13 @@ int LuaScriptInterface::luaLootSetId(lua_State* L)
 			auto ids = Item::items.nameToItems.equal_range(boost::algorithm::to_lower_copy(name));
 
 			if (ids.first == Item::items.nameToItems.cend()) {
-				std::cout << "[Warning - Loot:setId] Unknown loot item \"" << name << "\".\n";
+				LOG_STDOUT << "[Warning - Loot:setId] Unknown loot item \"" << name << "\".\n";
 				tfs::lua::pushBoolean(L, false);
 				return 1;
 			}
 
 			if (std::next(ids.first) != ids.second) {
-				std::cout << "[Warning - Loot:setId] Non-unique loot item \"" << name << "\".\n";
+				LOG_STDOUT << "[Warning - Loot:setId] Non-unique loot item \"" << name << "\".\n";
 				tfs::lua::pushBoolean(L, false);
 				return 1;
 			}
@@ -16346,7 +16346,7 @@ int LuaScriptInterface::luaSpellCreate(lua_State* L)
 	// Spell(words, name or id) to get an existing spell
 	// Spell(type) ex: Spell(SPELL_INSTANT) or Spell(SPELL_RUNE) to create a new spell
 	if (lua_gettop(L) == 1) {
-		std::cout << "[Error - Spell::luaSpellCreate] There is no parameter set!\n";
+		LOG_STDOUT << "[Error - Spell::luaSpellCreate] There is no parameter set!\n";
 		lua_pushnil(L);
 		return 1;
 	}
@@ -16528,13 +16528,13 @@ int LuaScriptInterface::luaSpellGroup(lua_State* L)
 				if (group != SPELLGROUP_NONE) {
 					spell->setGroup(group);
 				} else {
-					std::cout << "[Warning - Spell::group] Unknown group: " << tfs::lua::getString(L, 2) << '\n';
+					LOG_STDOUT << "[Warning - Spell::group] Unknown group: " << tfs::lua::getString(L, 2) << '\n';
 					tfs::lua::pushBoolean(L, false);
 					return 1;
 				}
 				tfs::lua::pushBoolean(L, true);
 			} else {
-				std::cout << "[Warning - Spell::group] Unknown group: " << tfs::lua::getString(L, 2) << '\n';
+				LOG_STDOUT << "[Warning - Spell::group] Unknown group: " << tfs::lua::getString(L, 2) << '\n';
 				tfs::lua::pushBoolean(L, false);
 				return 1;
 			}
@@ -16550,7 +16550,7 @@ int LuaScriptInterface::luaSpellGroup(lua_State* L)
 				if (primaryGroup != SPELLGROUP_NONE) {
 					spell->setGroup(primaryGroup);
 				} else {
-					std::cout << "[Warning - Spell::group] Unknown primaryGroup: " << tfs::lua::getString(L, 2) << '\n';
+					LOG_STDOUT << "[Warning - Spell::group] Unknown primaryGroup: " << tfs::lua::getString(L, 2) << '\n';
 					tfs::lua::pushBoolean(L, false);
 					return 1;
 				}
@@ -16558,14 +16558,14 @@ int LuaScriptInterface::luaSpellGroup(lua_State* L)
 				if (secondaryGroup != SPELLGROUP_NONE) {
 					spell->setSecondaryGroup(secondaryGroup);
 				} else {
-					std::cout << "[Warning - Spell::group] Unknown secondaryGroup: " << tfs::lua::getString(L, 3)
+					LOG_STDOUT << "[Warning - Spell::group] Unknown secondaryGroup: " << tfs::lua::getString(L, 3)
 					          << '\n';
 					tfs::lua::pushBoolean(L, false);
 					return 1;
 				}
 				tfs::lua::pushBoolean(L, true);
 			} else {
-				std::cout << "[Warning - Spell::group] Unknown primaryGroup: " << tfs::lua::getString(L, 2)
+				LOG_STDOUT << "[Warning - Spell::group] Unknown primaryGroup: " << tfs::lua::getString(L, 2)
 				          << " or secondaryGroup: " << tfs::lua::getString(L, 3) << '\n';
 				tfs::lua::pushBoolean(L, false);
 				return 1;
@@ -17517,7 +17517,7 @@ int LuaScriptInterface::luaCreatureEventType(lua_State* L)
 		} else if (tmpStr == "extendedopcode") {
 			creature->setEventType(CREATURE_EVENT_EXTENDED_OPCODE);
 		} else {
-			std::cout << "[Error - CreatureEvent::configureLuaEvent] Invalid type for creature event: " << typeName
+			LOG_STDOUT << "[Error - CreatureEvent::configureLuaEvent] Invalid type for creature event: " << typeName
 			          << '\n';
 			tfs::lua::pushBoolean(L, false);
 		}
@@ -17603,7 +17603,7 @@ int LuaScriptInterface::luaMoveEventType(lua_State* L)
 			moveevent->setEventType(MOVE_EVENT_REMOVE_ITEM);
 			moveevent->moveFunction = moveevent->RemoveItemField;
 		} else {
-			std::cout << "Error: [MoveEvent::configureMoveEvent] No valid event name " << typeName << '\n';
+			LOG_STDOUT << "Error: [MoveEvent::configureMoveEvent] No valid event name " << typeName << '\n';
 			tfs::lua::pushBoolean(L, false);
 		}
 		tfs::lua::pushBoolean(L, true);
@@ -17690,7 +17690,7 @@ int LuaScriptInterface::luaMoveEventSlot(lua_State* L)
 		} else if (slotName == "ammo") {
 			moveevent->setSlot(SLOTP_AMMO);
 		} else {
-			std::cout << "[Warning - MoveEvent::configureMoveEvent] Unknown slot type: " << slotName << '\n';
+			LOG_STDOUT << "[Warning - MoveEvent::configureMoveEvent] Unknown slot type: " << slotName << '\n';
 			tfs::lua::pushBoolean(L, false);
 			return 1;
 		}
@@ -17911,7 +17911,7 @@ int LuaScriptInterface::luaGlobalEventType(lua_State* L)
 		} else if (tmpStr == "save") {
 			global->setEventType(GLOBALEVENT_SAVE);
 		} else {
-			std::cout << "[Error - CreatureEvent::configureLuaEvent] Invalid type for global event: " << typeName
+			LOG_STDOUT << "[Error - CreatureEvent::configureLuaEvent] Invalid type for global event: " << typeName
 			          << '\n';
 			tfs::lua::pushBoolean(L, false);
 		}
@@ -17933,7 +17933,7 @@ int LuaScriptInterface::luaGlobalEventRegister(lua_State* L)
 		}
 
 		if (globalevent->getEventType() == GLOBALEVENT_NONE && globalevent->getInterval() == 0) {
-			std::cout << "[Error - LuaScriptInterface::luaGlobalEventRegister] No interval for globalevent with name "
+			LOG_STDOUT << "[Error - LuaScriptInterface::luaGlobalEventRegister] No interval for globalevent with name "
 			          << globalevent->getName() << '\n';
 			tfs::lua::pushBoolean(L, false);
 			return 1;
@@ -17972,7 +17972,7 @@ int LuaScriptInterface::luaGlobalEventTime(lua_State* L)
 
 		int32_t hour = params.front();
 		if (hour < 0 || hour > 23) {
-			std::cout << "[Error - GlobalEvent::configureEvent] Invalid hour \"" << timer
+			LOG_STDOUT << "[Error - GlobalEvent::configureEvent] Invalid hour \"" << timer
 			          << "\" for globalevent with name: " << globalevent->getName() << '\n';
 			tfs::lua::pushBoolean(L, false);
 			return 1;
@@ -17985,7 +17985,7 @@ int LuaScriptInterface::luaGlobalEventTime(lua_State* L)
 		if (params.size() > 1) {
 			min = params[1];
 			if (min < 0 || min > 59) {
-				std::cout << "[Error - GlobalEvent::configureEvent] Invalid minute \"" << timer
+				LOG_STDOUT << "[Error - GlobalEvent::configureEvent] Invalid minute \"" << timer
 				          << "\" for globalevent with name: " << globalevent->getName() << '\n';
 				tfs::lua::pushBoolean(L, false);
 				return 1;
@@ -17994,7 +17994,7 @@ int LuaScriptInterface::luaGlobalEventTime(lua_State* L)
 			if (params.size() > 2) {
 				sec = params[2];
 				if (sec < 0 || sec > 59) {
-					std::cout << "[Error - GlobalEvent::configureEvent] Invalid second \"" << timer
+					LOG_STDOUT << "[Error - GlobalEvent::configureEvent] Invalid second \"" << timer
 					          << "\" for globalevent with name: " << globalevent->getName() << '\n';
 					tfs::lua::pushBoolean(L, false);
 					return 1;
@@ -18097,7 +18097,7 @@ int LuaScriptInterface::luaWeaponAction(lua_State* L)
 		} else if (tmpStr == "move") {
 			weapon->action = WEAPONACTION_MOVE;
 		} else {
-			std::cout << "Error: [Weapon::action] No valid action " << typeName << '\n';
+			LOG_STDOUT << "Error: [Weapon::action] No valid action " << typeName << '\n';
 			tfs::lua::pushBoolean(L, false);
 		}
 		tfs::lua::pushBoolean(L, true);
@@ -18319,7 +18319,7 @@ int LuaScriptInterface::luaWeaponElement(lua_State* L)
 			} else if (tmpStrValue == "holy") {
 				weapon->params.combatType = COMBAT_HOLYDAMAGE;
 			} else {
-				std::cout << "[Warning - weapon:element] Type \"" << element << "\" does not exist.\n";
+				LOG_STDOUT << "[Warning - weapon:element] Type \"" << element << "\" does not exist.\n";
 			}
 		} else {
 			weapon->params.combatType = tfs::lua::getNumber<CombatType_t>(L, 2);
@@ -18580,7 +18580,7 @@ int LuaScriptInterface::luaWeaponAmmoType(lua_State* L)
 		} else if (type == "bolt") {
 			it.ammoType = AMMO_BOLT;
 		} else {
-			std::cout << "[Warning - weapon:ammoType] Type \"" << type << "\" does not exist.\n";
+			LOG_STDOUT << "[Warning - weapon:ammoType] Type \"" << type << "\" does not exist.\n";
 			lua_pushnil(L);
 			return 1;
 		}
@@ -18646,7 +18646,7 @@ int LuaScriptInterface::luaWeaponExtraElement(lua_State* L)
 			} else if (tmpStrValue == "holy") {
 				it.abilities.get()->elementType = COMBAT_HOLYDAMAGE;
 			} else {
-				std::cout << "[Warning - weapon:extraElement] Type \"" << element << "\" does not exist.\n";
+				LOG_STDOUT << "[Warning - weapon:extraElement] Type \"" << element << "\" does not exist.\n";
 			}
 		} else {
 			it.abilities.get()->elementType = tfs::lua::getNumber<CombatType_t>(L, 3);
@@ -18963,7 +18963,7 @@ void LuaEnvironment::executeTimerEvent(uint32_t eventIndex)
 		env->setScriptId(timerEventDesc.scriptId, this);
 		callFunction(timerEventDesc.parameters.size());
 	} else {
-		std::cout << "[Error - LuaScriptInterface::executeTimerEvent] Call stack overflow\n";
+		LOG_STDOUT << "[Error - LuaScriptInterface::executeTimerEvent] Call stack overflow\n";
 	}
 
 	// free resources

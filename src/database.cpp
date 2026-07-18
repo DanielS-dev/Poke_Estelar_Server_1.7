@@ -30,7 +30,7 @@ retry:
 
 	tfs::detail::Mysql_ptr handle{mysql_init(nullptr)};
 	if (!handle) {
-		std::cout << std::endl << "Failed to initialize MySQL connection handle." << std::endl;
+		LOG_STDOUT << std::endl << "Failed to initialize MySQL connection handle." << std::endl;
 		goto error;
 	}
 
@@ -46,7 +46,7 @@ retry:
 	                        getString(ConfigManager::MYSQL_USER).c_str(), getString(ConfigManager::MYSQL_PASS).c_str(),
 	                        getString(ConfigManager::MYSQL_DB).c_str(), getNumber(ConfigManager::SQL_PORT),
 	                        getString(ConfigManager::MYSQL_SOCK).c_str(), 0)) {
-		std::cout << std::endl << "MySQL Error Message: " << mysql_error(handle.get()) << std::endl;
+		LOG_STDOUT << std::endl << "MySQL Error Message: " << mysql_error(handle.get()) << std::endl;
 		goto error;
 	}
 	return handle;
@@ -67,7 +67,7 @@ static bool isLostConnectionError(const unsigned error)
 static bool executeQuery(tfs::detail::Mysql_ptr& handle, std::string_view query, const bool retryIfLostConnection)
 {
 	while (mysql_real_query(handle.get(), query.data(), query.length()) != 0) {
-		std::cout << "[Error - mysql_real_query] Query: " << query.substr(0, 256) << std::endl
+		LOG_STDOUT << "[Error - mysql_real_query] Query: " << query.substr(0, 256) << std::endl
 		          << "Message: " << mysql_error(handle.get()) << std::endl;
 		const unsigned error = mysql_errno(handle.get());
 		if (!isLostConnectionError(error) || !retryIfLostConnection) {
@@ -146,7 +146,7 @@ retry:
 	// as it is described in MySQL manual: "it doesn't hurt" :P
 	tfs::detail::MysqlResult_ptr res{mysql_store_result(handle.get())};
 	if (!res) {
-		std::cout << "[Error - mysql_store_result] Query: " << query << std::endl
+		LOG_STDOUT << "[Error - mysql_store_result] Query: " << query << std::endl
 		          << "Message: " << mysql_error(handle.get()) << std::endl;
 		const unsigned error = mysql_errno(handle.get());
 		if (!isLostConnectionError(error) || !retryQueries) {
@@ -200,7 +200,7 @@ std::string_view DBResult::getString(std::string_view column) const
 {
 	auto it = listNames.find(column);
 	if (it == listNames.end()) {
-		std::cout << "[Error - DBResult::getString] Column '" << column << "' does not exist in result set."
+		LOG_STDOUT << "[Error - DBResult::getString] Column '" << column << "' does not exist in result set."
 		          << std::endl;
 		return {};
 	}

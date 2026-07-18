@@ -93,9 +93,9 @@ bool load_from_xml()
 		if (res.second) {
 			const std::string& lowercase = boost::algorithm::to_lower_copy(className);
 			if (scriptInterface.loadFile("data/events/scripts/" + lowercase + ".lua") != 0) {
-				std::cout << "[Warning - tfs::events::load_from_xml] Can not load script: " << lowercase << ".lua"
+				LOG_STDOUT << "[Warning - tfs::events::load_from_xml] Can not load script: " << lowercase << ".lua"
 				          << std::endl;
-				std::cout << scriptInterface.getLastLuaError() << std::endl;
+				LOG_STDOUT << scriptInterface.getLastLuaError() << std::endl;
 			}
 		}
 
@@ -115,7 +115,7 @@ bool load_from_xml()
 			} else if (methodName == "onUpdateStorage") {
 				creatureHandlers.onUpdateStorage = event;
 			} else {
-				std::cout << "[Warning - tfs::events::load_from_xml] Unknown creature method: " << methodName
+				LOG_STDOUT << "[Warning - tfs::events::load_from_xml] Unknown creature method: " << methodName
 				          << std::endl;
 			}
 		} else if (className == "Party") {
@@ -134,7 +134,7 @@ bool load_from_xml()
 			} else if (methodName == "onPassLeadership") {
 				partyHandlers.onPassLeadership = event;
 			} else {
-				std::cout << "[Warning - tfs::events::load_from_xml] Unknown party method: " << methodName << std::endl;
+				LOG_STDOUT << "[Warning - tfs::events::load_from_xml] Unknown party method: " << methodName << std::endl;
 			}
 		} else if (className == "Player") {
 			if (methodName == "onBrowseField") {
@@ -188,7 +188,7 @@ bool load_from_xml()
 			} else if (methodName == "onSpellCheck") {
 				playerHandlers.onSpellCheck = event;
 			} else {
-				std::cout << "[Warning - tfs::events::load_from_xml] Unknown player method: " << methodName
+				LOG_STDOUT << "[Warning - tfs::events::load_from_xml] Unknown player method: " << methodName
 				          << std::endl;
 			}
 		} else if (className == "Monster") {
@@ -197,11 +197,11 @@ bool load_from_xml()
 			} else if (methodName == "onSpawn") {
 				monsterHandlers.onSpawn = event;
 			} else {
-				std::cout << "[Warning - tfs::events::load_from_xml] Unknown monster method: " << methodName
+				LOG_STDOUT << "[Warning - tfs::events::load_from_xml] Unknown monster method: " << methodName
 				          << std::endl;
 			}
 		} else {
-			std::cout << "[Warning - tfs::events::load_from_xml] Unknown class: " << className << std::endl;
+			LOG_STDOUT << "[Warning - tfs::events::load_from_xml] Unknown class: " << className << std::endl;
 		}
 	}
 
@@ -248,7 +248,7 @@ bool onChangeOutfit(Creature* creature, const Outfit_t& outfit)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::creature::onChangeOutfit] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::creature::onChangeOutfit] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -274,7 +274,7 @@ ReturnValue onAreaCombat(Creature* creature, Tile* tile, bool aggressive)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::creature::onAreaCombat] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::creature::onAreaCombat] Call stack overflow" << std::endl;
 		return RETURNVALUE_NOTPOSSIBLE;
 	}
 
@@ -317,7 +317,7 @@ ReturnValue onTargetCombat(Creature* creature, Creature* target)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::creature::onTargetCombat] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::creature::onTargetCombat] Call stack overflow" << std::endl;
 		return RETURNVALUE_NOTPOSSIBLE;
 	}
 
@@ -358,7 +358,7 @@ void onHear(Creature* creature, Creature* speaker, const std::string& words, Spe
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::creature::onHear] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::creature::onHear] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -388,7 +388,7 @@ void onChangeZone(Creature* creature, ZoneType_t fromZone, ZoneType_t toZone)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::creature::onChangeZone] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::creature::onChangeZone] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -416,7 +416,7 @@ void onUpdateStorage(Creature* creature, uint32_t key, std::optional<int32_t> va
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::creature::onUpdateStorage] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::creature::onUpdateStorage] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -460,7 +460,7 @@ bool onJoin(Party* party, Player* player)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::party::onJoin] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::party::onJoin] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -487,7 +487,7 @@ bool onLeave(Party* party, Player* player)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::party::onLeave] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::party::onLeave] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -514,7 +514,7 @@ bool onDisband(Party* party)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::party::onDisband] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::party::onDisband] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -538,7 +538,7 @@ bool onInvite(Party* party, Player* player)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::party::onInvite] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::party::onInvite] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -565,7 +565,7 @@ bool onRevokeInvitation(Party* party, Player* player)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::party::onRevokeInvitation] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::party::onRevokeInvitation] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -592,7 +592,7 @@ bool onPassLeadership(Party* party, Player* player)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::party::onPassLeadership] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::party::onPassLeadership] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -619,7 +619,7 @@ void onShareExperience(Party* party, uint64_t& exp)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::party::onShareExperience] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::party::onShareExperience] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -656,7 +656,7 @@ bool onBrowseField(Player* player, const Position& position)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onBrowseField] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onBrowseField] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -682,7 +682,7 @@ void onLook(Player* player, const Position& position, Thing* thing, uint8_t stac
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onLook] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onLook] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -720,7 +720,7 @@ void onLookInBattleList(Player* player, Creature* creature, int32_t lookDistance
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onLookInBattleList] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onLookInBattleList] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -749,7 +749,7 @@ void onLookInTrade(Player* player, Player* partner, Item* item, int32_t lookDist
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onLookInTrade] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onLookInTrade] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -781,7 +781,7 @@ bool onLookInShop(Player* player, const ItemType* itemType, uint8_t count)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onLookInShop] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onLookInShop] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -810,7 +810,7 @@ bool onLookInMarket(Player* player, const ItemType* itemType)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onLookInMarket] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onLookInMarket] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -839,7 +839,7 @@ ReturnValue onMoveItem(Player* player, Item* item, uint16_t count, const Positio
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onMoveItem] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onMoveItem] Call stack overflow" << std::endl;
 		return RETURNVALUE_NOTPOSSIBLE;
 	}
 
@@ -885,7 +885,7 @@ void onItemMoved(Player* player, Item* item, uint16_t count, const Position& fro
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onItemMoved] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onItemMoved] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -920,7 +920,7 @@ bool onMoveCreature(Player* player, Creature* creature, const Position& fromPosi
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onMoveCreature] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onMoveCreature] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -951,7 +951,7 @@ void onReportRuleViolation(Player* player, const std::string& targetName, uint8_
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onReportRuleViolation] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onReportRuleViolation] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -983,7 +983,7 @@ bool onReportBug(Player* player, const std::string& message, const Position& pos
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onReportBug] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onReportBug] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -1011,7 +1011,7 @@ void onRotateItem(Player* player, Item* item)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onRotateItem] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onRotateItem] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1038,7 +1038,7 @@ bool onTurn(Player* player, Direction direction)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onTurn] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onTurn] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -1064,7 +1064,7 @@ bool onTradeRequest(Player* player, Player* target, Item* item)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onTradeRequest] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onTradeRequest] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -1094,7 +1094,7 @@ bool onTradeAccept(Player* player, Player* target, Item* item, Item* targetItem)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onTradeAccept] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onTradeAccept] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -1127,7 +1127,7 @@ void onTradeCompleted(Player* player, Player* target, Item* item, Item* targetIt
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onTradeCompleted] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onTradeCompleted] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1162,7 +1162,7 @@ void onPodiumRequest(Player* player, Item* item)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onPodiumRequest] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onPodiumRequest] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1190,7 +1190,7 @@ void onPodiumEdit(Player* player, Item* item, const Outfit_t& outfit, bool podiu
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onPodiumEdit] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onPodiumEdit] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1222,7 +1222,7 @@ void onGainExperience(Player* player, Creature* source, uint64_t& exp, uint64_t 
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onGainExperience] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onGainExperience] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1264,7 +1264,7 @@ void onLoseExperience(Player* player, uint64_t& exp)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onLoseExperience] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onLoseExperience] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1297,7 +1297,7 @@ void onGainSkillTries(Player* player, skills_t skill, uint64_t& tries)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onGainSkillTries] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onGainSkillTries] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1331,7 +1331,7 @@ void onWrapItem(Player* player, Item* item)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onWrapItem] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onWrapItem] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1358,7 +1358,7 @@ void onInventoryUpdate(Player* player, Item* item, slots_t slot, bool equip)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onInventoryUpdate] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onInventoryUpdate] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1388,7 +1388,7 @@ void onNetworkMessage(Player* player, uint8_t recvByte, NetworkMessage_ptr& msg)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onNetworkMessage] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onNetworkMessage] Call stack overflow" << std::endl;
 		return;
 	}
 
@@ -1417,7 +1417,7 @@ bool onSpellCheck(Player* player, const Spell* spell)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::player::onSpellCheck] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::player::onSpellCheck] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -1447,7 +1447,7 @@ bool onSpawn(Monster* monster, const Position& position, bool startup, bool arti
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::monster:onSpawn] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::monster:onSpawn] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -1474,7 +1474,7 @@ void onDropLoot(Monster* monster, Container* corpse)
 	}
 
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - tfs::events::monsteronDropLoot] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - tfs::events::monsteronDropLoot] Call stack overflow" << std::endl;
 		return;
 	}
 

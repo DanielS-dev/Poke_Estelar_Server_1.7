@@ -1,9 +1,9 @@
 #include "listener.h"
 
+#include "../logger.hpp"
 #include "session.h"
 
 #include <boost/asio/strand.hpp>
-#include <fmt/core.h>
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -25,7 +25,7 @@ void Listener::accept()
 void Listener::on_accept(beast::error_code ec, asio::ip::tcp::socket socket)
 {
 	if (ec) {
-		fmt::print(stderr, "{}: {}\n", __FUNCTION__, ec.message());
+		LOG_ERROR("HTTP", std::string(__FUNCTION__) + ": " + ec.message());
 		return;
 	}
 

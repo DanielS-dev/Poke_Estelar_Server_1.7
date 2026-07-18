@@ -15,7 +15,7 @@ public:
 	explicit Protocol(Connection_ptr connection) : connection(connection)
 	{
 		if (deflateInit2(&zstream, 6, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY) != Z_OK) {
-			std::cout << "ZLIB initialization error: " << (zstream.msg ? zstream.msg : "unknown") << std::endl;
+			LOG_STDOUT << "ZLIB initialization error: " << (zstream.msg ? zstream.msg : "unknown") << std::endl;
 		}
 	}
 	virtual ~Protocol();

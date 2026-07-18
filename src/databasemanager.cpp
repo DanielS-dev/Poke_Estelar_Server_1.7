@@ -21,12 +21,12 @@ bool DatabaseManager::optimizeTables()
 
 	do {
 		const auto tableName = result->getString("TABLE_NAME");
-		std::cout << "> Optimizing table " << tableName << "..." << std::flush;
+		LOG_STDOUT << "> Optimizing table " << tableName << "..." << std::flush;
 
 		if (db.executeQuery(fmt::format("OPTIMIZE TABLE `{:s}`", tableName))) {
-			std::cout << " [success]" << std::endl;
+			LOG_STDOUT << " [success]" << std::endl;
 		} else {
-			std::cout << " [failed]" << std::endl;
+			LOG_STDOUT << " [failed]" << std::endl;
 		}
 	} while (result->next());
 	return true;
@@ -92,7 +92,7 @@ void DatabaseManager::updateDatabase()
 	int32_t version = getDatabaseVersion();
 	do {
 		if (luaL_dofile(L, fmt::format("data/migrations/{:d}.lua", version).c_str()) != 0) {
-			std::cout << "[Error - DatabaseManager::updateDatabase - Version: " << version << "] "
+			LOG_STDOUT << "[Error - DatabaseManager::updateDatabase - Version: " << version << "] "
 			          << lua_tostring(L, -1) << std::endl;
 			break;
 		}
@@ -104,7 +104,7 @@ void DatabaseManager::updateDatabase()
 		lua_getglobal(L, "onUpdateDatabase");
 		if (lua_pcall(L, 0, 1, 0) != 0) {
 			tfs::lua::resetScriptEnv();
-			std::cout << "[Error - DatabaseManager::updateDatabase - Version: " << version << "] "
+			LOG_STDOUT << "[Error - DatabaseManager::updateDatabase - Version: " << version << "] "
 			          << lua_tostring(L, -1) << std::endl;
 			break;
 		}
@@ -115,7 +115,7 @@ void DatabaseManager::updateDatabase()
 		}
 
 		version++;
-		std::cout << "> Database has been updated to version " << version << '.' << std::endl;
+		LOG_STDOUT << "> Database has been updated to version " << version << '.' << std::endl;
 		registerDatabaseConfig("db_version", version);
 
 		tfs::lua::resetScriptEnv();

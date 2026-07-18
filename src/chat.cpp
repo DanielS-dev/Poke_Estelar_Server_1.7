@@ -140,7 +140,7 @@ bool ChatChannel::executeCanJoinEvent(const Player& player)
 
 	// canJoin(player)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - CanJoinChannelEvent::execute] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - CanJoinChannelEvent::execute] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -165,7 +165,7 @@ bool ChatChannel::executeOnJoinEvent(const Player& player)
 
 	// onJoin(player)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - OnJoinChannelEvent::execute] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - OnJoinChannelEvent::execute] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -190,7 +190,7 @@ bool ChatChannel::executeOnLeaveEvent(const Player& player)
 
 	// onLeave(player)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - OnLeaveChannelEvent::execute] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - OnLeaveChannelEvent::execute] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -215,7 +215,7 @@ bool ChatChannel::executeOnSpeakEvent(const Player& player, SpeakClasses& type, 
 
 	// onSpeak(player, type, message)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - OnSpeakChannelEvent::execute] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - OnSpeakChannelEvent::execute] Call stack overflow" << std::endl;
 		return false;
 	}
 
@@ -288,7 +288,7 @@ bool Chat::load()
 					channel.onJoinEvent = scriptInterface.getEvent("onJoin");
 					channel.onLeaveEvent = scriptInterface.getEvent("onLeave");
 				} else {
-					std::cout << "[Warning - Chat::load] Can not load script: " << scriptAttribute.as_string()
+					LOG_STDOUT << "[Warning - Chat::load] Can not load script: " << scriptAttribute.as_string()
 					          << std::endl;
 				}
 			}
@@ -311,7 +311,7 @@ bool Chat::load()
 				channel.onJoinEvent = scriptInterface.getEvent("onJoin");
 				channel.onLeaveEvent = scriptInterface.getEvent("onLeave");
 			} else {
-				std::cout << "[Warning - Chat::load] Can not load script: " << scriptAttribute.as_string() << std::endl;
+				LOG_STDOUT << "[Warning - Chat::load] Can not load script: " << scriptAttribute.as_string() << std::endl;
 			}
 		}
 

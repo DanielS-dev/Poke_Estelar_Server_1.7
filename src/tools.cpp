@@ -13,7 +13,7 @@
 
 void printXMLError(const std::string& where, std::string_view fileName, const pugi::xml_parse_result& result)
 {
-	std::cout << '[' << where << "] Failed to load " << fileName << ": " << result.description() << std::endl;
+	LOG_STDOUT << '[' << where << "] Failed to load " << fileName << ": " << result.description() << std::endl;
 
 	FILE* file = fopen(fileName.data(), "rb");
 	if (!file) {
@@ -48,16 +48,16 @@ void printXMLError(const std::string& where, std::string_view fileName, const pu
 	} while (bytes == 32768);
 	fclose(file);
 
-	std::cout << "Line " << currentLine << ':' << std::endl;
-	std::cout << line << std::endl;
+	LOG_STDOUT << "Line " << currentLine << ':' << std::endl;
+	LOG_STDOUT << line << std::endl;
 	for (size_t i = 0; i < lineOffsetPosition; i++) {
 		if (line[i] == '\t') {
-			std::cout << '\t';
+			LOG_STDOUT << '\t';
 		} else {
-			std::cout << ' ';
+			LOG_STDOUT << ' ';
 		}
 	}
-	std::cout << '^' << std::endl;
+	LOG_STDOUT << '^' << std::endl;
 }
 
 std::string transformToSHA1(std::string_view input)

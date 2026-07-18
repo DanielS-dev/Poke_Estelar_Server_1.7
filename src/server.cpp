@@ -95,7 +95,7 @@ void ServiceManager::stop()
 		try {
 			boost::asio::post(io_context, [servicePort = servicePortIt.second]() { servicePort->onStopServer(); });
 		} catch (boost::system::system_error& e) {
-			std::cout << "[ServiceManager::stop] Network Error: " << e.what() << std::endl;
+			LOG_STDOUT << "[ServiceManager::stop] Network Error: " << e.what() << std::endl;
 		}
 	}
 
@@ -203,7 +203,7 @@ void ServicePort::open(uint16_t port)
 				boost::system::error_code err;
 				acceptor->set_option(ip::v6_only{false}, err);
 				if (err) {
-					std::cout << "[Warning - ServicePort::open] Enabling IPv4 support failed: " << err.message()
+					LOG_STDOUT << "[Warning - ServicePort::open] Enabling IPv4 support failed: " << err.message()
 					          << std::endl;
 				}
 			}
@@ -212,7 +212,7 @@ void ServicePort::open(uint16_t port)
 
 		accept();
 	} catch (boost::system::system_error& e) {
-		std::cout << "[ServicePort::open] Error: " << e.what() << std::endl;
+		LOG_STDOUT << "[ServicePort::open] Error: " << e.what() << std::endl;
 
 		pendingStart = true;
 		g_scheduler.addEvent(createSchedulerTask(

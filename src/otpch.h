@@ -56,4 +56,6 @@
 #include <lua.hpp>
 #endif
 
+#include "logger.hpp"
+
 #endif // FS_OTPCH_H

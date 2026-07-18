@@ -8,6 +8,7 @@
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <system_error>
 
@@ -177,12 +178,123 @@ std::string buildTimestamp()
 	       << millis.count();
 	return stream.str();
 }
+
+void writeToBuffer(std::streambuf* buffer, const std::string& line)
+{
+	if (!buffer) {
+		return;
+	}
+
+	buffer->sputn(line.c_str(), static_cast<std::streamsize>(line.size()));
+	buffer->sputc('\n');
+	buffer->pubsync();
+}
 } // namespace
+
+class Logger::RedirectStreamBuffer final : public std::streambuf
+{
+	public:
+		RedirectStreamBuffer(LogLevel logLevel, std::string logCategory) :
+		    level(logLevel), category(std::move(logCategory))
+		{}
+
+		void flushPending()
+		{
+			sync();
+		}
+
+	protected:
+		int overflow(int character) override
+		{
+			if (character == traits_type::eof()) {
+				return traits_type::not_eof(character);
+			}
+
+			buffer.push_back(static_cast<char>(character));
+			if (character == '\n') {
+				submitLines(false);
+			}
+			return character;
+		}
+
+		int sync() override
+		{
+			submitLines(true);
+			return 0;
+		}
+
+	private:
+		void submitLines(bool flushPartial)
+		{
+			size_t start = 0;
+			while (true) {
+				const size_t lineBreak = buffer.find('\n', start);
+				if (lineBreak == std::string::npos) {
+					break;
+				}
+
+				std::string line = buffer.substr(start, lineBreak - start);
+				if (!line.empty() && line.back() == '\r') {
+					line.pop_back();
+				}
+				if (!line.empty()) {
+					Logger::getInstance().log(level, category, line, nullptr, 0);
+				}
+				start = lineBreak + 1;
+			}
+
+			if (flushPartial && start < buffer.size()) {
+				std::string line = buffer.substr(start);
+				if (!line.empty() && line.back() == '\r') {
+					line.pop_back();
+				}
+				if (!line.empty()) {
+					Logger::getInstance().log(level, category, line, nullptr, 0);
+				}
+				start = buffer.size();
+			}
+
+			if (start > 0) {
+				buffer.erase(0, start);
+			}
+		}
+
+		LogLevel level;
+		std::string category;
+		std::string buffer;
+};
 
 Logger& Logger::getInstance()
 {
 	static Logger instance;
 	return instance;
+}
+
+Logger::Stream::Stream(LogLevel logLevel, std::string logCategory, const char* sourceFile, int sourceLine) :
+    level(logLevel), category(std::move(logCategory)), file(sourceFile), line(sourceLine)
+{}
+
+Logger::Stream::Stream(Stream&& other) noexcept :
+    level(other.level), category(std::move(other.category)), file(other.file), line(other.line),
+    buffer(std::move(other.buffer)), active(other.active)
+{
+	other.active = false;
+}
+
+Logger::Stream::~Stream()
+{
+	if (!active) {
+		return;
+	}
+
+	std::string message = buffer.str();
+	while (!message.empty() && (message.back() == '\n' || message.back() == '\r')) {
+		message.pop_back();
+	}
+
+	if (!message.empty()) {
+		Logger::getInstance().log(level, category, message, file, line);
+	}
 }
 
 Logger::~Logger()
@@ -211,6 +323,12 @@ void Logger::initialize(const Config& loggerConfig)
 	}
 
 	worker = std::thread(&Logger::threadMain, this);
+	attachStandardStreams();
+}
+
+Logger::Stream Logger::stream(LogLevel level, std::string_view category, const char* file, int line) const
+{
+	return Stream(level, std::string(category), file, line);
 }
 
 void Logger::initializeFromEnv(const std::filesystem::path& fileName)
@@ -225,6 +343,12 @@ void Logger::initializeFromEnv(const std::filesystem::path& fileName)
 	loggerConfig.console = getEnvBool(env, "LOG_TO_CONSOLE", true);
 	loggerConfig.file = getEnvBool(env, "LOG_TO_FILE", true);
 	loggerConfig.splitFilesByLevel = getEnvBool(env, "LOG_SPLIT_BY_LEVEL", true);
+	loggerConfig.captureStandardStreams = getEnvBool(env, "LOG_CAPTURE_STD_STREAMS", true);
+	loggerConfig.consoleCompact = getEnvBool(env, "LOG_CONSOLE_COMPACT", true);
+	loggerConfig.consoleShowCategory = getEnvBool(env, "LOG_CONSOLE_SHOW_CATEGORY", false);
+	loggerConfig.consoleShowLegacyInfo = getEnvBool(env, "LOG_CONSOLE_SHOW_LEGACY_INFO", false);
+	loggerConfig.fileIncludeTimestamp = getEnvBool(env, "LOG_FILE_INCLUDE_TIMESTAMP", true);
+	loggerConfig.fileIncludeSource = getEnvBool(env, "LOG_FILE_INCLUDE_SOURCE", true);
 	loggerConfig.directory = getEnvString(env, "LOG_DIR", "logs");
 	loggerConfig.fileName = getEnvString(env, "LOG_FILE", "logs/server.log");
 	loggerConfig.maxFileSizeMb = getEnvNumber(env, "LOG_MAX_FILE_SIZE_MB", 10);
@@ -235,6 +359,8 @@ void Logger::initializeFromEnv(const std::filesystem::path& fileName)
 
 void Logger::shutdown()
 {
+	detachStandardStreams();
+
 	{
 		std::scoped_lock lock(mutex);
 		if (!initialized) {
@@ -323,19 +449,10 @@ void Logger::threadMain()
 
 void Logger::writeMessage(const LogMessage& message)
 {
-	std::ostringstream fullMessage;
-	fullMessage << '[' << message.timestamp << "] [" << getLevelName(message.level) << "] [" << message.category << "] "
-	            << message.message;
-	if (!message.sourceFile.empty()) {
-		fullMessage << " (" << message.sourceFile << ':' << message.line << ')';
-	}
-
 	if (config.console && config.consoleLevel != LogLevel::Off && message.level >= config.consoleLevel) {
-		if (message.level == LogLevel::Info) {
-			std::cout << '[' << message.category << "] " << message.message << std::endl;
-		} else {
-			std::cout << '[' << getLevelName(message.level) << "] [" << message.category << "] " << message.message
-			          << std::endl;
+		const std::string consoleMessage = buildConsoleMessage(message);
+		if (!consoleMessage.empty()) {
+			writeConsoleLine(message.level, consoleMessage);
 		}
 	}
 
@@ -343,7 +460,7 @@ void Logger::writeMessage(const LogMessage& message)
 		if (std::ofstream* output = getFileStream(message.level)) {
 			const auto fileName = getFileName(message.level);
 			rotateFileIfNeeded(fileName, *output);
-			*output << fullMessage.str() << std::endl;
+			*output << buildFileMessage(message) << std::endl;
 		}
 	}
 }
@@ -462,5 +579,117 @@ void Logger::disableFileLogging(const std::string& reason)
 {
 	config.file = false;
 	closeStreams();
-	std::cerr << "[error] [Logger] File logging disabled: " << reason << std::endl;
+	writeConsoleLine(LogLevel::Error, "[error] [Logger] File logging disabled: " + reason);
+}
+
+void Logger::attachStandardStreams()
+{
+	std::scoped_lock lock(mutex);
+	if (!initialized || standardStreamsAttached || !config.captureStandardStreams) {
+		return;
+	}
+
+	originalCoutBuffer = std::cout.rdbuf();
+	originalCerrBuffer = std::cerr.rdbuf();
+	originalClogBuffer = std::clog.rdbuf();
+
+	coutRedirect = std::make_unique<RedirectStreamBuffer>(LogLevel::Info, "StdOut");
+	cerrRedirect = std::make_unique<RedirectStreamBuffer>(LogLevel::Error, "StdErr");
+	clogRedirect = std::make_unique<RedirectStreamBuffer>(LogLevel::Debug, "StdLog");
+
+	std::cout.rdbuf(coutRedirect.get());
+	std::cerr.rdbuf(cerrRedirect.get());
+	std::clog.rdbuf(clogRedirect.get());
+	standardStreamsAttached = true;
+}
+
+void Logger::detachStandardStreams()
+{
+	{
+		std::scoped_lock lock(mutex);
+		if (!standardStreamsAttached) {
+			return;
+		}
+	}
+
+	flushRedirectedStreams();
+
+	std::scoped_lock lock(mutex);
+	std::cout.rdbuf(originalCoutBuffer);
+	std::cerr.rdbuf(originalCerrBuffer);
+	std::clog.rdbuf(originalClogBuffer);
+	coutRedirect.reset();
+	cerrRedirect.reset();
+	clogRedirect.reset();
+	originalCoutBuffer = nullptr;
+	originalCerrBuffer = nullptr;
+	originalClogBuffer = nullptr;
+	standardStreamsAttached = false;
+}
+
+void Logger::flushRedirectedStreams()
+{
+	std::unique_ptr<RedirectStreamBuffer>* buffers[] = {&coutRedirect, &cerrRedirect, &clogRedirect};
+	for (auto* buffer : buffers) {
+		if (buffer->get()) {
+			(*buffer)->flushPending();
+		}
+	}
+}
+
+void Logger::writeConsoleLine(LogLevel level, const std::string& line)
+{
+	std::streambuf* target = originalCoutBuffer;
+	if (level >= LogLevel::Error && originalCerrBuffer) {
+		target = originalCerrBuffer;
+	}
+
+	if (!target) {
+		target = level >= LogLevel::Error ? std::cerr.rdbuf() : std::cout.rdbuf();
+	}
+
+	writeToBuffer(target, line);
+}
+
+std::string Logger::buildConsoleMessage(const LogMessage& message) const
+{
+	if (!config.consoleShowLegacyInfo && message.category == "Legacy" && message.level <= LogLevel::Info) {
+		return {};
+	}
+
+	if (!config.consoleCompact) {
+		return buildFileMessage(message);
+	}
+
+	std::ostringstream stream;
+	if (message.level == LogLevel::Warn || message.level == LogLevel::Error || message.level == LogLevel::Fatal) {
+		stream << '[' << getLevelName(message.level) << "] ";
+	}
+
+	if (config.consoleShowCategory && !message.category.empty()) {
+		stream << '[' << message.category << "] ";
+	}
+
+	stream << message.message;
+	return stream.str();
+}
+
+std::string Logger::buildFileMessage(const LogMessage& message) const
+{
+	std::ostringstream stream;
+	if (config.fileIncludeTimestamp && !message.timestamp.empty()) {
+		stream << '[' << message.timestamp << "] ";
+	}
+
+	stream << '[' << getLevelName(message.level) << "] ";
+	if (!message.category.empty()) {
+		stream << '[' << message.category << "] ";
+	}
+
+	stream << message.message;
+	if (config.fileIncludeSource && !message.sourceFile.empty()) {
+		stream << " (" << message.sourceFile << ':' << message.line << ')';
+	}
+
+	return stream.str();
 }

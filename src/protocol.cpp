@@ -47,9 +47,9 @@ Protocol::~Protocol()
 {
 	const auto zlibEndResult = deflateEnd(&zstream);
 	if (zlibEndResult == Z_DATA_ERROR) {
-		std::cout << "ZLIB discarded pending output or unprocessed input while cleaning up stream state" << std::endl;
+		LOG_STDOUT << "ZLIB discarded pending output or unprocessed input while cleaning up stream state" << std::endl;
 	} else if (zlibEndResult == Z_STREAM_ERROR) {
-		std::cout << "ZLIB encountered an error while cleaning up stream state" << std::endl;
+		LOG_STDOUT << "ZLIB encountered an error while cleaning up stream state" << std::endl;
 	}
 }
 
@@ -116,7 +116,7 @@ bool Protocol::deflateMessage(OutputMessage& msg)
 
 	const auto result = deflate(&zstream, Z_FINISH);
 	if (result != Z_OK && result != Z_STREAM_END) {
-		std::cout << "Error while deflating packet data error: " << (zstream.msg ? zstream.msg : "unknown")
+		LOG_STDOUT << "Error while deflating packet data error: " << (zstream.msg ? zstream.msg : "unknown")
 		          << std::endl;
 		return false;
 	}
@@ -125,7 +125,7 @@ bool Protocol::deflateMessage(OutputMessage& msg)
 	deflateReset(&zstream);
 
 	if (size <= 0) {
-		std::cout << "Deflated packet data had invalid size: " << size
+		LOG_STDOUT << "Deflated packet data had invalid size: " << size
 		          << " error: " << (zstream.msg ? zstream.msg : "unknown") << std::endl;
 		return false;
 	}

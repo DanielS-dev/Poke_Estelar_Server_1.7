@@ -59,7 +59,7 @@ bool Actions::registerLuaEvent(Action* event)
 		for (auto& id : range) {
 			auto result = useItemMap.emplace(id, *action);
 			if (!result.second) {
-				std::cout << "[Warning - Actions::registerLuaEvent] Duplicate registered item with id: " << id
+				LOG_STDOUT << "[Warning - Actions::registerLuaEvent] Duplicate registered item with id: " << id
 				          << " in range from id: " << range.front() << ", to id: " << range.back() << std::endl;
 			}
 		}
@@ -69,7 +69,7 @@ bool Actions::registerLuaEvent(Action* event)
 		for (auto& id : range) {
 			auto result = uniqueItemMap.emplace(id, *action);
 			if (!result.second) {
-				std::cout << "[Warning - Actions::registerLuaEvent] Duplicate registered item with uid: " << id
+				LOG_STDOUT << "[Warning - Actions::registerLuaEvent] Duplicate registered item with uid: " << id
 				          << " in range from uid: " << range.front() << ", to uid: " << range.back() << std::endl;
 			}
 		}
@@ -79,14 +79,14 @@ bool Actions::registerLuaEvent(Action* event)
 		for (auto& id : range) {
 			auto result = actionItemMap.emplace(id, *action);
 			if (!result.second) {
-				std::cout << "[Warning - Actions::registerLuaEvent] Duplicate registered item with aid: " << id
+				LOG_STDOUT << "[Warning - Actions::registerLuaEvent] Duplicate registered item with aid: " << id
 				          << " in range from aid: " << range.front() << ", to aid: " << range.back() << std::endl;
 			}
 		}
 		return true;
 	}
 
-	std::cout << "[Warning - Actions::registerLuaEvent] There is no id / aid / uid set for this event" << std::endl;
+	LOG_STDOUT << "[Warning - Actions::registerLuaEvent] There is no id / aid / uid set for this event" << std::endl;
 	return false;
 }
 
@@ -376,7 +376,7 @@ bool Action::executeUse(Player* player, Item* item, const Position& fromPosition
 {
 	// onUse(player, item, fromPosition, target, toPosition, isHotkey)
 	if (!tfs::lua::reserveScriptEnv()) {
-		std::cout << "[Error - Action::executeUse] Call stack overflow" << std::endl;
+		LOG_STDOUT << "[Error - Action::executeUse] Call stack overflow" << std::endl;
 		return false;
 	}
 
