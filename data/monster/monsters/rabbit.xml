@@ -26,9 +26,6 @@
 		<flag catchchance="333" />
 	</flags>
 	<script>
-		<event name="MonsterHealthChange" />
-		<event name="CorpseLevel" />
-		<event name="CorpseLoot" />
 	</script>
 	<bestiary class="Mammal" prowess="10" expertise="100" mastery="250" charmPoints="10" difficulty="trivial" occurrence="common" locations="Rabbit Locations..." />
 	<attacks>

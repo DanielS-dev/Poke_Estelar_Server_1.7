@@ -2,6 +2,15 @@ local event = Event()
 
 event.onLook = function(self, thing, position, distance, description)
 	local description = "You see " .. thing:getDescription(distance)
+	if thing:isItem() then
+		local pokeName = thing:getCustomAttribute("pokeName")
+		if pokeName then
+			local pokeHealth = thing:getCustomAttribute("pokeHealth") or 0
+			local pokeMaxHealth = thing:getCustomAttribute("pokeMaxHealth") or 0
+			description = string.format("%s\nPokemon: %s\nHP: %d / %d", description, pokeName, pokeHealth, pokeMaxHealth)
+		end
+	end
+
 	if self:getGroup():getAccess() then
 		if thing:isItem() then
 			description = string.format("%s\nItem ID: %d", description, thing:getId())
