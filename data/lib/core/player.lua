@@ -1,5 +1,50 @@
 local foodCondition = Condition(CONDITION_REGENERATION, CONDITIONID_DEFAULT)
 
+function Player.getUsingBall(self)
+    local function searchItem(item)
+        if not item then
+            return nil
+        end
+
+        if item:getCustomAttribute("isBeingUsed") == 1 then
+            return item
+        end
+
+        if item:isContainer() then
+            for i = 0, item:getSize() - 1 do
+                local found = searchItem(item:getItem(i))
+                if found then
+                    return found
+                end
+            end
+        end
+
+        return nil
+    end
+
+    local slots = {
+        CONST_SLOT_HEAD,
+        CONST_SLOT_NECKLACE,
+        CONST_SLOT_BACKPACK,
+        CONST_SLOT_ARMOR,
+        CONST_SLOT_RIGHT,
+        CONST_SLOT_LEFT,
+        CONST_SLOT_LEGS,
+        CONST_SLOT_FEET,
+        CONST_SLOT_RING,
+        CONST_SLOT_AMMO
+    }
+
+    for _, slot in ipairs(slots) do
+        local found = searchItem(self:getSlotItem(slot))
+        if found then
+            return found
+        end
+    end
+
+    return nil
+end
+
 function Player.feed(self, food)
 	local condition = self:getCondition(CONDITION_REGENERATION, CONDITIONID_DEFAULT)
 	if condition then

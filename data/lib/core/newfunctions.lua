@@ -1,5 +1,5 @@
 balls = {
-pokeball = {emptyId = 59268, usedOn = 59270, usedOff = 26672, effectFail = 1087, effectSucceed = 1088, missile = 192, effectRelease = 1060, chanceMultiplier = 1.0}
+pokeball = {emptyId = 59268, usedOn = 59270, usedOff = 59268, effectFail = 1087, effectSucceed = 1088, missile = 192, effectRelease = 1060, chanceMultiplier = 1.0}
 }
 
 function getBallKey(uid)
@@ -101,3 +101,275 @@ summonLevelDamageBuff = 0.008 -- buff due to summon's level
 playerLevelDamageBuff = 0.0005 -- buff due to player's level
 summonBoostDamageBuff = 0.008 -- buff due to summon's boost
 summonLoveDamageBuff = 0.0002
+
+function Player:canReleaseSummon(pokeLevel, pokeBoost, ownerName)
+
+	-- to fix ball bug
+	if not pokeLevel then return false end
+
+	--antiga usaga a quantidade de Insígnias
+	--local playerLevel = self:getLevel() + (10 * getBadgeQuantity(self))
+	local playerLevel = self:getLevel()
+	local minimumLevel = (pokeLevel + pokeBoost) - 10
+
+	if playerLevel < minimumLevel then
+		self:sendCancelMessage("Sorry, not possible. You need level " .. minimumLevel .. " to use this pokemon.")
+		return false
+	end
+
+	if ownerName then
+		if self:getStorageValue(quests.cathemAll.prizes[1].uid) < 2 then
+			print("WARNING! Player " .. self:getName() .. " using unique Pokemon without finish the quest!")
+		end
+	end
+
+	if ownerName and ownerName ~= self:getName() then
+		self:sendCancelMessage("Sorry, it belongs to " .. ownerName .. ".")
+		return false
+	end
+
+	return true
+end
+
+function Monster.getSummonLevel(self)
+	if self:isPokemon() then
+		local master = self:getMaster()
+		local item = master:getUsingBall()
+		local pokeLevel = item:getCustomAttribute("pokeLevel")
+		if pokeLevel ~= nil then			
+			return pokeLevel
+		end
+	elseif isMonster(self) then
+		return self:getLevel()
+	end
+	return 1
+end
+
+function Monster.getSummonName(self)
+	if isSummon(self) then
+		local master = self:getMaster()
+--		local item = master:getSlotItem(CONST_SLOT_AMMO)
+		local item = master:getUsingBall()
+		local pokeName = item:getCustomAttribute("pokeName")
+		if pokeName ~= nil then			
+			return pokeName
+		end
+	end
+	return "unamed"
+end
+
+function Item:getSummonLevel()
+	return self:getCustomAttribute("pokeLevel")
+end
+
+function Item:getSummonBoost()
+	return self:getCustomAttribute("pokeBoost")
+end
+
+function Item:getSummonOwner()
+	return self:getCustomAttribute("owner")
+end
+
+function Monster.getTotalSpeed(self)
+	-- ADICIONE ESTE BLOCO ABAIXO BEM NO INÍCIO DO MÉTODO:
+    local ball = nil
+    local master = self:getMaster()
+    if master and master:isPlayer() then
+        ball = master:getUsingBall()
+    end
+    
+    -- Se por acaso não achar a pokébola, define uma velocidade padrão para não quebrar
+    if not ball then 
+        return 250 
+    end
+
+	local monsterType = MonsterType(self:getName())
+	if self:isPokemon() then 
+		local total = math.floor(monsterType:getBaseSpeed() + (2 * self:getLevel()))
+		-- CÓDIGO CORRIGIDO COM PROTEÇÃO:
+		local vitamins = (ball.getUsedVitaminsNumber and ball:getUsedVitaminsNumber("speed")) or 0
+		if vitamins > 0 then
+			total = total + math.floor(monsterType:getBaseSpeed() * vitamins / maxVitamins * vitaminStatusBuff)
+		end
+		return total
+	elseif self:isMonster() then
+		return math.floor(monsterType:getBaseSpeed() + (2 * self:getLevel()))
+	end
+	return 0
+end
+
+function Monster.getTotalHealth(self)
+	local level = 1 -- Valor padrão de segurança
+    
+		-- Descobre quem é o dono do Pokémon
+		local master = self:getMaster()
+		if master and master:isPlayer() then
+			-- Pega a pokébola ativa que está na bag/slot do jogador
+			local ball = master:getUsingBall()
+			if ball then
+				-- Lê o level que salvamos na pokébola lá no catch!
+				level = ball:getCustomAttribute("pokeLevel") or 1
+			end
+		end
+
+	local monsterType = MonsterType(self:getName())
+	if self:isPokemon() then -- Life Formula
+		local hp = monsterType:getMaxHealth()
+
+		local lv = self:getLevel()
+		local total = math.floor((lv * 20) + (hp * 0.10)) + hp
+		if self:getMaster() and self:getMaster():getUsingBall() and self:getMaster():getUsingBall():getCustomAttribute("nature") then
+			if isInArray({"Timid", "Hasty", "Jolly", "Naive"}, self:getMaster():getUsingBall():getCustomAttribute("nature")) then
+				total = total * 1.10
+			elseif isInArray({"Brave", "Relaxed", "Quiet", "Sassy"}, self:getMaster():getUsingBall():getCustomAttribute("nature")) then
+				total = total * 0.90
+			end
+		end
+		if self:getMaster():getVocation():getName() == "Blocker" then
+			total = total * blockerHealthBuff
+		end
+
+		return total
+	elseif self:isMonster() then
+		local hp = self:getMaxHealth()
+		local lv = self:getLevel()
+		local formula = ((lv * 20) + (hp * 0.10)) + hp
+		return math.floor(formula)
+	end
+	return 0
+end
+
+-- Registro correto do método getLevel para a classe Monster no TFS 1.7
+function Monster.getLevel(self)
+    -- Descobre quem é o dono desse Pokémon
+    local master = self:getMaster()
+    if master and master:isPlayer() then
+        -- Busca a pokébola que está ativa com o jogador
+        local ball = master:getUsingBall()
+        if ball then
+            -- Lê o level salvo na pokébola (onde o Item sim possui getCustomAttribute)
+            return ball:getCustomAttribute("pokeLevel") or 1
+        end
+    end
+    return 1 -- Valor padrão de segurança caso não encontre
+end
+
+function doRemoveSummon(cid, effect, message, safeRemove, missile)
+	local player = Player(cid)
+	if not player then
+		return false
+	end
+
+	local ball = player:getUsingBall()
+	if not ball then
+		return false
+	end
+
+	local summonId = ball:getCustomAttribute("summonId")
+	local summon = summonId and Monster(summonId) or nil
+	if not summon or summon:getMaster() ~= player then
+		local summons = player:getSummons()
+		summon = summons and summons[1]
+	end
+
+	if not summon then
+		ball:setCustomAttribute("isBeingUsed", 0)
+		ball:removeAttribute("summonId")
+		return false
+	end
+
+	local health = summon:getHealth()
+	if health < 0 then
+		health = 0
+	end
+
+	ball:setCustomAttribute("pokeHealth", health)
+	ball:setCustomAttribute("pokeLookDir", summon:getDirection())
+	ball:setCustomAttribute("isBeingUsed", 0)
+	ball:removeAttribute("summonId")
+
+	if effect then
+		summon:getPosition():sendMagicEffect(effect)
+	end
+
+	if missile then
+		doSendDistanceShoot(summon:getPosition(), player:getPosition(), missile)
+	end
+
+	if message ~= false then
+		player:say("Volte!", TALKTYPE_MONSTER_SAY)
+	end
+
+	local summonGuid = summon:getId()
+	summon:setTarget(nil)
+	summon:setFollowCreature(nil)
+	player:removeSummon(summon)
+	addEvent(doRemoveCreature, 1, summonGuid)
+	return true
+end
+
+function doReleaseSummon(cid, pos, effect, message, missile)
+	local player = Player(cid)
+	if not player then return false end
+	local ball = player:getUsingBall()
+	if not ball then return false end
+	if effect == nil then effect = CONST_ME_TELEPORT end
+	if message == nil then message = true end
+	local name = ball:getCustomAttribute("pokeName")
+	if not name then
+		ball:setCustomAttribute("isBeingUsed", 0)
+		return false
+	end
+
+	local monsterType = MonsterType(name)
+	if not monsterType then
+		player:sendCancelMessage("Sorry, not possible. Monster invalid.")
+		ball:setCustomAttribute("isBeingUsed", 0)
+		return false
+	end
+
+	local health = ball:getCustomAttribute("pokeHealth") or 0
+	if health <= 0 then
+		player:sendCancelMessage("Sorry, not possible. Your summon is dead.")
+		ball:setCustomAttribute("isBeingUsed", 0)
+		return true
+	end	
+
+	local spawnPos = Position(player:getPosition())
+	spawnPos:getNextPosition(player:getDirection())
+
+	local newPos = player:getClosestFreePosition(spawnPos, 2) or player:getClosestFreePosition(pos, 2) or pos
+	if newPos.x == 0 then
+		newPos = pos
+	end
+
+	local monster = Game.createMonster(name, newPos, true, true)
+	if not monster then
+		ball:setCustomAttribute("isBeingUsed", 0)
+    	return false
+ 	end
+
+	if message then
+		player:say(monster:getName() .. ", venha me ajudar!", TALKTYPE_MONSTER_SAY)
+	end
+
+	player:addSummon(monster)
+	monster:setDirection(ball:getCustomAttribute("pokeLookDir") or DIRECTION_SOUTH)
+	ball:setCustomAttribute("summonId", monster:getId())
+	monster:setTarget(nil)
+	monster:setFollowCreature(player)
+
+	local maxHealth = ball:getCustomAttribute("pokeMaxHealth") or monster:getMaxHealth()
+	monster:setMaxHealth(maxHealth)
+	monster:setHealth(math.min(health, maxHealth))
+
+	if effect then
+		monster:getPosition():sendMagicEffect(effect)
+	end
+	if missile then
+		doSendDistanceShoot(player:getPosition(), monster:getPosition(), missile)
+	end
+
+	monster:removeTarget(player)
+	return monster:getId()
+end

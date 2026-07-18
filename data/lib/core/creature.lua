@@ -1,3 +1,8 @@
+function Creature.isPokemon(self)
+    -- Se for um monstro (e não um Player ou NPC), no contexto do Pokétibia ele é um Pokémon
+    return self:isMonster()
+end
+
 function Creature.getClosestFreePosition(self, position, maxRadius, mustBeReachable)
 	maxRadius = maxRadius or 1
 
