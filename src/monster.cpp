@@ -15,6 +15,56 @@
 extern Game g_game;
 extern Monsters g_monsters;
 
+namespace
+{
+bool canTeleportSummonTo(Monster* summon, const Position& position)
+{
+	Tile* tile = g_game.map.getTile(position);
+	if (!tile) {
+		return false;
+	}
+
+	if (tile->hasProperty(CONST_PROP_BLOCKPATH) || tile->hasProperty(CONST_PROP_BLOCKSOLID) ||
+	    tile->hasProperty(CONST_PROP_IMMOVABLEBLOCKPATH) || tile->hasProperty(CONST_PROP_IMMOVABLEBLOCKSOLID)) {
+		return false;
+	}
+
+	return tile->queryAdd(0, *summon, 1, FLAG_IGNOREBLOCKITEM) == RETURNVALUE_NOERROR;
+}
+
+bool teleportSummonNextToMaster(Monster* summon, Creature* master)
+{
+	if (!summon || !master) {
+		return false;
+	}
+
+	const Position& masterPos = master->getPosition();
+	const Direction masterDirection = master->getDirection();
+
+	std::vector<Position> candidatePositions;
+	candidatePositions.reserve(5);
+	candidatePositions.push_back(getNextPosition(masterDirection, masterPos));
+	candidatePositions.push_back(getNextPosition(DIRECTION_NORTH, masterPos));
+	candidatePositions.push_back(getNextPosition(DIRECTION_EAST, masterPos));
+	candidatePositions.push_back(getNextPosition(DIRECTION_SOUTH, masterPos));
+	candidatePositions.push_back(getNextPosition(DIRECTION_WEST, masterPos));
+
+	for (const Position& candidatePos : candidatePositions) {
+		if (canTeleportSummonTo(summon, candidatePos) &&
+		    g_game.internalTeleport(summon, candidatePos, false) == RETURNVALUE_NOERROR) {
+			return true;
+		}
+	}
+
+	Tile* masterTile = g_game.map.getTile(masterPos);
+	if (masterTile && masterTile->queryAdd(0, *summon, 1, FLAG_IGNOREBLOCKITEM) == RETURNVALUE_NOERROR) {
+		return g_game.internalTeleport(summon, masterPos, false) == RETURNVALUE_NOERROR;
+	}
+
+	return false;
+}
+} // namespace
+
 int32_t Monster::despawnRange;
 int32_t Monster::despawnRadius;
 
@@ -242,6 +292,8 @@ void Monster::onCreatureMove(Creature* creature, const Tile* newTile, const Posi
 
 		if (canSeeNewPos && isSummon() && getMaster() == creature) {
 			isMasterInRange = true; // Follow master again
+		} else if (isSummon() && getMaster() == creature && (teleport || newPos.z != oldPos.z)) {
+			isMasterInRange = teleportSummonNextToMaster(this, creature);
 		}
 
 		updateIdleStatus();
@@ -472,8 +524,11 @@ void Monster::onCreatureLeave(Creature* creature)
 	// std::cout << "onCreatureLeave - " << creature->getName() << std::endl;
 
 	if (getMaster() == creature) {
-		// Take random steps and only use defense abilities (e.g. heal) until its master comes back
-		isMasterInRange = false;
+		isMasterInRange = teleportSummonNextToMaster(this, creature);
+		if (!isMasterInRange) {
+			// Take random steps and only use defense abilities (e.g. heal) until its master comes back
+			isMasterInRange = false;
+		}
 	}
 
 	// update friendList
@@ -1196,6 +1251,22 @@ bool Monster::getNextStep(Direction& direction, uint32_t& flags)
 		// we don't have anyone watching, might as well stop walking
 		eventWalk = 0;
 		return false;
+	}
+
+	if (isSummon()) {
+		Creature* master = getMaster();
+		if (master) {
+			const Position& masterPos = master->getPosition();
+			const Position& myPos = getPosition();
+			if (masterPos.z != myPos.z || !canSee(masterPos)) {
+				if (teleportSummonNextToMaster(this, master)) {
+					isMasterInRange = true;
+					setFollowCreature(master);
+					return false;
+				}
+				isMasterInRange = false;
+			}
+		}
 	}
 
 	bool result = false;

@@ -308,6 +308,44 @@ function doRemoveSummon(cid, effect, message, safeRemove, missile)
 	return true
 end
 
+local function isValidSummonTile(player, position)
+	local tile = Tile(position)
+	if not tile or not tile:isWalkable() then
+		return false
+	end
+
+	if tile:getCreatureCount() > 0 then
+		return false
+	end
+
+	return tile:queryAdd(player, FLAG_IGNOREBLOCKCREATURE) == RETURNVALUE_NOERROR
+end
+
+local function getValidSummonPosition(player, basePosition)
+	local directions = {
+		player:getDirection(),
+		DIRECTION_NORTH,
+		DIRECTION_EAST,
+		DIRECTION_SOUTH,
+		DIRECTION_WEST
+	}
+
+	for _, direction in ipairs(directions) do
+		local testPos = Position(basePosition)
+		testPos:getNextPosition(direction)
+		if isValidSummonTile(player, testPos) then
+			return testPos
+		end
+	end
+
+	local fallbackPos = player:getClosestFreePosition(basePosition, 2)
+	if fallbackPos and fallbackPos.x ~= 0 and isValidSummonTile(player, fallbackPos) then
+		return fallbackPos
+	end
+
+	return nil
+end
+
 function doReleaseSummon(cid, pos, effect, message, missile)
 	local player = Player(cid)
 	if not player then return false end
@@ -335,12 +373,11 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 		return true
 	end	
 
-	local spawnPos = Position(player:getPosition())
-	spawnPos:getNextPosition(player:getDirection())
-
-	local newPos = player:getClosestFreePosition(spawnPos, 2) or player:getClosestFreePosition(pos, 2) or pos
-	if newPos.x == 0 then
-		newPos = pos
+	local newPos = getValidSummonPosition(player, player:getPosition()) or getValidSummonPosition(player, pos)
+	if not newPos then
+		player:sendCancelMessage("Sorry, not possible to call your summon here.")
+		ball:setCustomAttribute("isBeingUsed", 0)
+		return false
 	end
 
 	local monster = Game.createMonster(name, newPos, true, true)

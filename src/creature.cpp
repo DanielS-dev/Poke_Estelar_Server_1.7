@@ -389,17 +389,36 @@ void Creature::onCreatureMove(Creature* creature, const Tile* newTile, const Pos
 		}
 
 		if (!summons.empty()) {
-			// check if any of our summons is out of range (+/- 2 floors or 30 tiles away)
-			std::forward_list<Creature*> despawnList;
+			// teleport summons back near the master if they get too far away or change floor
+			std::forward_list<Creature*> teleportList;
 			for (Creature* summon : summons) {
 				const Position& pos = summon->getPosition();
 				if (newPos.getDistanceZ(pos) > 2 || std::max(newPos.getDistanceX(pos), newPos.getDistanceY(pos)) > 30) {
-					despawnList.push_front(summon);
+					teleportList.push_front(summon);
 				}
 			}
 
-			for (Creature* despawnCreature : despawnList) {
-				g_game.removeCreature(despawnCreature, true);
+			for (Creature* teleportCreature : teleportList) {
+				const Direction masterDirection = getDirection();
+				std::vector<Position> candidatePositions;
+				candidatePositions.reserve(5);
+				candidatePositions.push_back(getNextPosition(masterDirection, newPos));
+				candidatePositions.push_back(getNextPosition(DIRECTION_WEST, newPos));
+				candidatePositions.push_back(getNextPosition(DIRECTION_EAST, newPos));
+				candidatePositions.push_back(getNextPosition(DIRECTION_NORTH, newPos));
+				candidatePositions.push_back(getNextPosition(DIRECTION_SOUTH, newPos));
+
+				bool teleported = false;
+				for (const Position& candidatePos : candidatePositions) {
+					if (g_game.internalTeleport(teleportCreature, candidatePos, false) == RETURNVALUE_NOERROR) {
+						teleported = true;
+						break;
+					}
+				}
+
+				if (!teleported) {
+					g_game.internalTeleport(teleportCreature, newPos, false);
+				}
 			}
 		}
 
