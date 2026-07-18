@@ -80,6 +80,27 @@ Pendente para proximas etapas:
 - integracao no startup/shutdown
 - migracao dos primeiros pontos da source
 
+## Etapa 4 - Startup e shutdown
+
+Status: concluida
+
+Arquivos alterados:
+- `src/otserv.cpp`
+- `docs/LOGGER_ETAPAS.md`
+
+Escopo implementado:
+- inicializacao do logger no inicio de `startServer()`
+- leitura do `.env` no bootstrap da source
+- log de erro centralizado em `startupErrorMessage(...)`
+- log do servidor online/offline
+- log do fluxo de encerramento
+- shutdown explicito do logger ao final do ciclo do servidor
+
+Resultado desta etapa:
+- o logger passa a existir desde o bootstrap do servidor
+- falhas de startup agora entram no logger
+- o encerramento fecha a thread do logger de forma controlada
+
 ## Etapa 3 - Build
 
 Status: concluida

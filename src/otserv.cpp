@@ -11,6 +11,7 @@
 #include "game.h"
 #include "http/http.h"
 #include "iomarket.h"
+#include "logger.hpp"
 #include "monsters.h"
 #include "outfit.h"
 #include "protocolstatus.h"
@@ -43,6 +44,7 @@ namespace {
 
 void startupErrorMessage(const std::string& errorStr)
 {
+	LOG_ERROR("Startup", errorStr);
 	fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "> ERROR: {:s}\n", errorStr);
 	g_loaderSignal.notify_all();
 }
@@ -272,8 +274,11 @@ void startServer()
 {
 	// Setup bad allocation handler
 	std::set_new_handler(badAllocationHandler);
+	Logger::getInstance().initializeFromEnv(".env");
+	LOG_INFO("Startup", "Logger initialized from .env");
 
 	ServiceManager serviceManager;
+	LOG_INFO("Startup", "Starting dispatcher and scheduler");
 
 	g_dispatcher.start();
 	g_scheduler.start();
@@ -283,18 +288,24 @@ void startServer()
 	g_loaderSignal.wait(g_loaderUniqueLock);
 
 	if (serviceManager.is_running()) {
+		LOG_INFO("Startup", getString(ConfigManager::SERVER_NAME) + " server online");
 		std::cout << ">> " << getString(ConfigManager::SERVER_NAME) << " Server Online!" << std::endl << std::endl;
 		serviceManager.run();
+		LOG_INFO("Shutdown", "Service manager finished");
 	} else {
+		LOG_WARN("Startup", "No services running. Server is not online");
 		std::cout << ">> No services running. The server is NOT online." << std::endl;
 		g_scheduler.shutdown();
 		g_databaseTasks.shutdown();
 		g_dispatcher.shutdown();
 	}
 
+	LOG_INFO("Shutdown", "Waiting worker threads to finish");
 	g_scheduler.join();
 	g_databaseTasks.join();
 	g_dispatcher.join();
+	LOG_INFO("Shutdown", "Logger shutting down");
+	Logger::getInstance().shutdown();
 }
 
 void printServerVersion()
