@@ -177,4 +177,7 @@
 	<action fromid="18488" toid="18492" script="others/skill_trainer.lua" />
 	<action itemid="20252" script="others/bed_modification_kits.lua" />
 	<action fromid="22845" toid="22846" script="others/teleport.lua" />
+
+	<!-- Balls catch-->
+	<action itemid="59268" script="poke/catch.lua" allowfaruse="1" />
 </actions>

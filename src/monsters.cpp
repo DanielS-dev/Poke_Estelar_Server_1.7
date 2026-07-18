@@ -972,6 +972,8 @@ MonsterType* Monsters::loadMonster(const std::string& file, const std::string& m
 				mType->info.canWalkOnFire = attr.as_bool();
 			} else if (caseInsensitiveEqual(attrName, "canwalkonpoison")) {
 				mType->info.canWalkOnPoison = attr.as_bool();
+			} else if (caseInsensitiveEqual(attrName, "catchchance")) {
+				mType->info.catchChance = pugi::cast<uint16_t>(attr.value());
 			} else {
 				std::cout << "[Warning - Monsters::loadMonster] Unknown flag attribute: " << attrName << ". " << file
 				          << std::endl;

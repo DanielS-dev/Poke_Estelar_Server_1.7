@@ -132,6 +132,7 @@ class MonsterType
 
 		LightInfo light = {};
 		uint16_t lookcorpse = 0;
+		uint16_t catchChance = 0;
 
 		uint64_t experience = 0;
 

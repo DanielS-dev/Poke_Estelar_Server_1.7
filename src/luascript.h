@@ -1118,6 +1118,8 @@ private:
 	static int luaMonsterTypeGetDefenseList(lua_State* L);
 	static int luaMonsterTypeAddDefense(lua_State* L);
 
+	static int luaMonsterTypeGetCatchChance(lua_State* L);
+
 	static int luaMonsterTypeGetElementList(lua_State* L);
 	static int luaMonsterTypeAddElement(lua_State* L);
 
@@ -1155,6 +1157,8 @@ private:
 	static int luaMonsterTypeChangeTargetSpeed(lua_State* L);
 
 	static int luaMonsterTypeBestiaryInfo(lua_State* L);
+
+	static int luaMonsterTypeGetNumber(lua_State* L);
 
 	// Loot
 	static int luaCreateLoot(lua_State* L);
