@@ -1,5 +1,5 @@
 balls = {
-pokeball = {emptyId = 59268, usedOn = 59270, usedOff = 59268, effectFail = 1087, effectSucceed = 1088, missile = 192, effectRelease = 1060, chanceMultiplier = 1.0}
+pokeball = {emptyId = 59268, usedOn = 59270, usedOff = 59268, effectFail = 350, effectSucceed = 351, missile = 192, effectRelease = 352, chanceMultiplier = 1.0}
 }
 
 function getBallKey(uid)
