@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<monster name="Rabbit" nameDescription="a rabbit" race="blood" experience="25" speed="180" manacost="220" raceId="74">
-	<!--
-		Base de estrutura para Pokemon no TFS 1.7.
-		Tags antigas como level, moves, evolutions, race2, portraitid, shiny/mega e similares
-		devem ser adicionadas depois que a source estiver preparada para ler esses campos.
-	-->
+<monster name="Rabbit" nameDescription="a rabbit" race="normal" race2="none" experience="25" speed="180" manacost="220" raceId="74">
+	<level min="3" max="5"/>
 	<health now="45" max="45" />
 	<look type="74" corpse="6017" />
 	<targetchange interval="5000" chance="0" />
@@ -12,6 +8,7 @@
 		<flag summonable="1" />
 		<flag attackable="1" />
 		<flag hostile="1" />
+		<flag passive="0" />
 		<flag illusionable="1" />
 		<flag convinceable="1" />
 		<flag pushable="1" />
@@ -20,14 +17,28 @@
 		<flag targetdistance="1" />
 		<flag staticattack="90" />
 		<flag runonhealth="0" />
+		<flag dexentry="0" />
+		<flag portraitid="0" />
+		<flag hasshiny="0" />
+		<flag hasmega="0" />
+		<flag flyable="0" />
+		<flag rideable="0" />
+		<flag surfable="0" />
+		<flag canteleport="0" />
+		<flag catchchance="333" />
+		<flag moveMagicAttackBase="0" />
+		<flag moveMagicDefenseBase="0" />
 		<flag canwalkonenergy="0" />
 		<flag canwalkonfire="0" />
 		<flag canwalkonpoison="0" />
-		<flag catchchance="333" />
 	</flags>
 	<script>
 	</script>
 	<bestiary class="Mammal" prowess="10" expertise="100" mastery="250" charmPoints="10" difficulty="trivial" occurrence="common" locations="Rabbit Locations..." />
+	<moves>
+	</moves>
+	<evolutions>
+	</evolutions>
 	<attacks>
 		<attack name="melee" interval="2000" min="-8" max="-15" />
 	</attacks>

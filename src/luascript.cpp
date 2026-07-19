@@ -1309,6 +1309,22 @@ void LuaScriptInterface::registerFunctions()
 	registerEnum(L, COMBAT_ICEDAMAGE);
 	registerEnum(L, COMBAT_HOLYDAMAGE);
 	registerEnum(L, COMBAT_DEATHDAMAGE);
+	registerEnum(L, COMBAT_PSYCHICDAMAGE);
+	registerEnum(L, COMBAT_GRASSDAMAGE);
+	registerEnum(L, COMBAT_NORMALDAMAGE);
+	registerEnum(L, COMBAT_WATERDAMAGE);
+	registerEnum(L, COMBAT_FLYINGDAMAGE);
+	registerEnum(L, COMBAT_POISONDAMAGE);
+	registerEnum(L, COMBAT_ELECTRICDAMAGE);
+	registerEnum(L, COMBAT_GROUNDDAMAGE);
+	registerEnum(L, COMBAT_ROCKDAMAGE);
+	registerEnum(L, COMBAT_BUGDAMAGE);
+	registerEnum(L, COMBAT_DRAGONDAMAGE);
+	registerEnum(L, COMBAT_GHOSTDAMAGE);
+	registerEnum(L, COMBAT_DARKDAMAGE);
+	registerEnum(L, COMBAT_STEELDAMAGE);
+	registerEnum(L, COMBAT_FAIRYDAMAGE);
+	registerEnum(L, COMBAT_FIGHTINGDAMAGE);
 
 	registerEnum(L, COMBAT_PARAM_TYPE);
 	registerEnum(L, COMBAT_PARAM_EFFECT);
@@ -14890,6 +14906,54 @@ int LuaScriptInterface::luaMonsterTypeCombatImmunities(lua_State* L)
 			} else if (immunity == "death") {
 				monsterType->info.damageImmunities |= COMBAT_DEATHDAMAGE;
 				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "psychic") {
+				monsterType->info.damageImmunities |= COMBAT_PSYCHICDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "grass") {
+				monsterType->info.damageImmunities |= COMBAT_GRASSDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "normal") {
+				monsterType->info.damageImmunities |= COMBAT_NORMALDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "water") {
+				monsterType->info.damageImmunities |= COMBAT_WATERDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "flying") {
+				monsterType->info.damageImmunities |= COMBAT_FLYINGDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "poison") {
+				monsterType->info.damageImmunities |= COMBAT_POISONDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "electric") {
+				monsterType->info.damageImmunities |= COMBAT_ELECTRICDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "ground") {
+				monsterType->info.damageImmunities |= COMBAT_GROUNDDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "rock") {
+				monsterType->info.damageImmunities |= COMBAT_ROCKDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "bug") {
+				monsterType->info.damageImmunities |= COMBAT_BUGDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "dragon") {
+				monsterType->info.damageImmunities |= COMBAT_DRAGONDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "ghost") {
+				monsterType->info.damageImmunities |= COMBAT_GHOSTDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "dark") {
+				monsterType->info.damageImmunities |= COMBAT_DARKDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "steel") {
+				monsterType->info.damageImmunities |= COMBAT_STEELDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "fairy") {
+				monsterType->info.damageImmunities |= COMBAT_FAIRYDAMAGE;
+				tfs::lua::pushBoolean(L, true);
+			} else if (immunity == "fighting") {
+				monsterType->info.damageImmunities |= COMBAT_FIGHTINGDAMAGE;
+				tfs::lua::pushBoolean(L, true);
 			} else if (immunity == "lifedrain") {
 				monsterType->info.damageImmunities |= COMBAT_LIFEDRAIN;
 				tfs::lua::pushBoolean(L, true);
@@ -15370,6 +15434,42 @@ int LuaScriptInterface::luaMonsterTypeRace(lua_State* L)
 				monsterType->info.race = RACE_FIRE;
 			} else if (race == "energy") {
 				monsterType->info.race = RACE_ENERGY;
+			} else if (race == "ink") {
+				monsterType->info.race = RACE_INK;
+			} else if (race == "grass") {
+				monsterType->info.race = RACE_GRASS;
+			} else if (race == "normal") {
+				monsterType->info.race = RACE_NORMAL;
+			} else if (race == "water") {
+				monsterType->info.race = RACE_WATER;
+			} else if (race == "flying") {
+				monsterType->info.race = RACE_FLYING;
+			} else if (race == "poison") {
+				monsterType->info.race = RACE_POISON;
+			} else if (race == "electric") {
+				monsterType->info.race = RACE_ELECTRIC;
+			} else if (race == "ground") {
+				monsterType->info.race = RACE_GROUND;
+			} else if (race == "psychic") {
+				monsterType->info.race = RACE_PSYCHIC;
+			} else if (race == "rock") {
+				monsterType->info.race = RACE_ROCK;
+			} else if (race == "ice") {
+				monsterType->info.race = RACE_ICE;
+			} else if (race == "bug") {
+				monsterType->info.race = RACE_BUG;
+			} else if (race == "dragon") {
+				monsterType->info.race = RACE_DRAGON;
+			} else if (race == "ghost") {
+				monsterType->info.race = RACE_GHOST;
+			} else if (race == "dark") {
+				monsterType->info.race = RACE_DARK;
+			} else if (race == "steel") {
+				monsterType->info.race = RACE_STEEL;
+			} else if (race == "fairy") {
+				monsterType->info.race = RACE_FAIRY;
+			} else if (race == "fighting") {
+				monsterType->info.race = RACE_FIGHTING;
 			} else {
 				LOG_STDOUT << "[Warning - Monsters::loadMonster] Unknown race type " << race << ".\n";
 				lua_pushnil(L);

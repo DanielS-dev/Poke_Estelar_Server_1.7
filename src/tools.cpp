@@ -520,6 +520,12 @@ CombatTypeNames combatTypeNames = {
     {COMBAT_FIREDAMAGE, "fire"},         {COMBAT_UNDEFINEDDAMAGE, "undefined"}, {COMBAT_LIFEDRAIN, "lifedrain"},
     {COMBAT_MANADRAIN, "manadrain"},     {COMBAT_HEALING, "healing"},           {COMBAT_DROWNDAMAGE, "drown"},
     {COMBAT_ICEDAMAGE, "ice"},           {COMBAT_HOLYDAMAGE, "holy"},           {COMBAT_DEATHDAMAGE, "death"},
+    {COMBAT_PSYCHICDAMAGE, "psychic"},   {COMBAT_GRASSDAMAGE, "grass"},         {COMBAT_NORMALDAMAGE, "normal"},
+    {COMBAT_WATERDAMAGE, "water"},       {COMBAT_FLYINGDAMAGE, "flying"},       {COMBAT_POISONDAMAGE, "poison"},
+    {COMBAT_ELECTRICDAMAGE, "electric"}, {COMBAT_GROUNDDAMAGE, "ground"},       {COMBAT_ROCKDAMAGE, "rock"},
+    {COMBAT_BUGDAMAGE, "bug"},           {COMBAT_DRAGONDAMAGE, "dragon"},       {COMBAT_GHOSTDAMAGE, "ghost"},
+    {COMBAT_DARKDAMAGE, "dark"},         {COMBAT_STEELDAMAGE, "steel"},         {COMBAT_FAIRYDAMAGE, "fairy"},
+    {COMBAT_FIGHTINGDAMAGE, "fighting"},
 };
 
 AmmoTypeNames ammoTypeNames = {
@@ -794,6 +800,38 @@ size_t combatTypeToIndex(CombatType_t combatType)
 			return 10;
 		case COMBAT_DEATHDAMAGE:
 			return 11;
+		case COMBAT_PSYCHICDAMAGE:
+			return 12;
+		case COMBAT_GRASSDAMAGE:
+			return 13;
+		case COMBAT_NORMALDAMAGE:
+			return 14;
+		case COMBAT_WATERDAMAGE:
+			return 15;
+		case COMBAT_FLYINGDAMAGE:
+			return 16;
+		case COMBAT_POISONDAMAGE:
+			return 17;
+		case COMBAT_ELECTRICDAMAGE:
+			return 18;
+		case COMBAT_GROUNDDAMAGE:
+			return 19;
+		case COMBAT_ROCKDAMAGE:
+			return 20;
+		case COMBAT_BUGDAMAGE:
+			return 21;
+		case COMBAT_DRAGONDAMAGE:
+			return 22;
+		case COMBAT_GHOSTDAMAGE:
+			return 23;
+		case COMBAT_DARKDAMAGE:
+			return 24;
+		case COMBAT_STEELDAMAGE:
+			return 25;
+		case COMBAT_FAIRYDAMAGE:
+			return 26;
+		case COMBAT_FIGHTINGDAMAGE:
+			return 27;
 		default:
 			return 0;
 	}

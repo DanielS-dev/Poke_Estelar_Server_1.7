@@ -129,10 +129,17 @@ class MonsterType
 		Skulls_t skull = SKULL_NONE;
 		Outfit_t outfit = {};
 		RaceType_t race = RACE_BLOOD;
+		std::string race2 = "none";
 
 		LightInfo light = {};
 		uint16_t lookcorpse = 0;
 		uint16_t catchChance = 0;
+		uint16_t minLevel = 1;
+		uint16_t maxLevel = 1;
+		uint16_t dexEntry = 0;
+		uint16_t portraitId = 0;
+		uint16_t moveMagicAttackBase = 0;
+		uint16_t moveMagicDefenseBase = 0;
 
 		uint64_t experience = 0;
 
@@ -170,10 +177,17 @@ class MonsterType
 		bool isIgnoringSpawnBlock = false;
 		bool isIllusionable = false;
 		bool isSummonable = false;
+		bool isPassive = false;
 		bool hiddenHealth = false;
 		bool canWalkOnEnergy = true;
 		bool canWalkOnFire = true;
 		bool canWalkOnPoison = true;
+		bool hasShiny = false;
+		bool hasMega = false;
+		bool isFlyable = false;
+		bool isRideable = false;
+		bool isSurfable = false;
+		bool canTeleport = false;
 
 		MonstersEvent_t eventType = MONSTERS_EVENT_NONE;
 	};

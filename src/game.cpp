@@ -4081,6 +4081,41 @@ void Game::combatGetTypeInfo(CombatType_t combatType, Creature* target, TextColo
 						}
 					}
 					break;
+				case RACE_POISON:
+					color = TEXTCOLOR_LIGHTGREEN;
+					effect = CONST_ME_HITBYPOISON;
+					splash = Item::CreateItem(ITEM_SMALLSPLASH, FLUID_SLIME);
+					break;
+				case RACE_ELECTRIC:
+					color = TEXTCOLOR_ELECTRICPURPLE;
+					effect = CONST_ME_ENERGYHIT;
+					break;
+				case RACE_GHOST:
+					color = TEXTCOLOR_LIGHTGREY;
+					effect = CONST_ME_HITAREA;
+					break;
+				case RACE_GRASS:
+				case RACE_NORMAL:
+				case RACE_WATER:
+				case RACE_FLYING:
+				case RACE_GROUND:
+				case RACE_PSYCHIC:
+				case RACE_ROCK:
+				case RACE_ICE:
+				case RACE_BUG:
+				case RACE_DRAGON:
+				case RACE_DARK:
+				case RACE_STEEL:
+				case RACE_FAIRY:
+				case RACE_FIGHTING:
+					color = TEXTCOLOR_RED;
+					effect = CONST_ME_DRAWBLOOD;
+					if (const Tile* tile = target->getTile()) {
+						if (!tile->hasFlag(TILESTATE_PROTECTIONZONE)) {
+							splash = Item::CreateItem(ITEM_SMALLSPLASH, FLUID_BLOOD);
+						}
+					}
+					break;
 				default:
 					color = TEXTCOLOR_NONE;
 					effect = CONST_ME_NONE;
@@ -4135,6 +4170,86 @@ void Game::combatGetTypeInfo(CombatType_t combatType, Creature* target, TextColo
 		case COMBAT_LIFEDRAIN: {
 			color = TEXTCOLOR_RED;
 			effect = CONST_ME_MAGIC_RED;
+			break;
+		}
+		case COMBAT_PSYCHICDAMAGE: {
+			color = TEXTCOLOR_PASTELRED;
+			effect = CONST_ME_MAGIC_RED;
+			break;
+		}
+		case COMBAT_GRASSDAMAGE: {
+			color = TEXTCOLOR_LIGHTGREEN;
+			effect = CONST_ME_GREEN_RINGS;
+			break;
+		}
+		case COMBAT_NORMALDAMAGE: {
+			color = TEXTCOLOR_RED;
+			effect = CONST_ME_DRAWBLOOD;
+			break;
+		}
+		case COMBAT_WATERDAMAGE: {
+			color = TEXTCOLOR_LIGHTBLUE;
+			effect = CONST_ME_LOSEENERGY;
+			break;
+		}
+		case COMBAT_FLYINGDAMAGE: {
+			color = TEXTCOLOR_WHITE_EXP;
+			effect = CONST_ME_GROUNDSHAKER;
+			break;
+		}
+		case COMBAT_POISONDAMAGE: {
+			color = TEXTCOLOR_LIGHTGREEN;
+			effect = CONST_ME_HITBYPOISON;
+			break;
+		}
+		case COMBAT_ELECTRICDAMAGE: {
+			color = TEXTCOLOR_ELECTRICPURPLE;
+			effect = CONST_ME_ENERGYHIT;
+			break;
+		}
+		case COMBAT_GROUNDDAMAGE: {
+			color = TEXTCOLOR_ORANGE;
+			effect = CONST_ME_GROUNDSHAKER;
+			break;
+		}
+		case COMBAT_ROCKDAMAGE: {
+			color = TEXTCOLOR_ORANGE;
+			effect = CONST_ME_STONES;
+			break;
+		}
+		case COMBAT_BUGDAMAGE: {
+			color = TEXTCOLOR_LIGHTGREEN;
+			effect = CONST_ME_GREEN_RINGS;
+			break;
+		}
+		case COMBAT_DRAGONDAMAGE: {
+			color = TEXTCOLOR_PURPLE;
+			effect = CONST_ME_MORTAREA;
+			break;
+		}
+		case COMBAT_GHOSTDAMAGE: {
+			color = TEXTCOLOR_LIGHTGREY;
+			effect = CONST_ME_SMALLCLOUDS;
+			break;
+		}
+		case COMBAT_DARKDAMAGE: {
+			color = TEXTCOLOR_DARKRED;
+			effect = CONST_ME_SMALLCLOUDS;
+			break;
+		}
+		case COMBAT_STEELDAMAGE: {
+			color = TEXTCOLOR_LIGHTGREY;
+			effect = CONST_ME_BLOCKHIT;
+			break;
+		}
+		case COMBAT_FAIRYDAMAGE: {
+			color = TEXTCOLOR_PASTELRED;
+			effect = CONST_ME_HOLYDAMAGE;
+			break;
+		}
+		case COMBAT_FIGHTINGDAMAGE: {
+			color = TEXTCOLOR_RED;
+			effect = CONST_ME_HITAREA;
 			break;
 		}
 		default: {
