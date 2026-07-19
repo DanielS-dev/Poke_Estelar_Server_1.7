@@ -84,6 +84,7 @@ Monster::Monster(MonsterType* mType) : Creature(), nameDescription(mType->nameDe
 	defaultOutfit = mType->info.outfit;
 	currentOutfit = mType->info.outfit;
 	skull = mType->info.skull;
+	level = std::max<uint16_t>(1, mType->info.minLevel);
 	health = mType->info.health;
 	healthMax = mType->info.healthMax;
 	baseSpeed = mType->info.baseSpeed;

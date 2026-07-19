@@ -3435,6 +3435,14 @@ void ProtocolGame::AddCreature(NetworkMessage& msg, const Creature* creature, bo
 		}
 	}
 
+	std::string creatureName;
+	if (!creature->isHealthHidden()) {
+		creatureName = creature->getName();
+		if (const Monster* monster = creature->getMonster()) {
+			creatureName = fmt::format("{} [{}]", creatureName, monster->getLevel());
+		}
+	}
+
 	if (known) {
 		msg.add<uint16_t>(0x62);
 		msg.add<uint32_t>(creature->getID());
@@ -3448,7 +3456,7 @@ void ProtocolGame::AddCreature(NetworkMessage& msg, const Creature* creature, bo
 			msg.add<uint32_t>(masterId);
 		}
 
-		msg.addString(creature->isHealthHidden() ? "" : creature->getName());
+		msg.addString(creature->isHealthHidden() ? "" : creatureName);
 	}
 
 	if (creature->isHealthHidden()) {

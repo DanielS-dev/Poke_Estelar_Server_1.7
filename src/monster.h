@@ -79,6 +79,7 @@ public:
 	bool canSee(const Position& pos) const override;
 	bool canSeeInvisibility() const override { return isImmune(CONDITION_INVISIBLE); }
 	uint32_t getManaCost() const { return mType->info.manaCost; }
+	uint16_t getLevel() const { return level; }
 	void setSpawn(Spawn* spawn) { this->spawn = spawn; }
 	bool canWalkOnFieldType(CombatType_t combatType) const;
 
@@ -146,6 +147,7 @@ private:
 
 	MonsterType* mType;
 	Spawn* spawn = nullptr;
+	uint16_t level = 1;
 
 	int64_t lastMeleeAttack = 0;
 
