@@ -17,6 +17,26 @@ extern Monsters g_monsters;
 
 namespace
 {
+constexpr double MONSTER_LEVEL_HEALTH_BUFF = 0.10;
+
+uint16_t getMonsterSpawnLevel(const MonsterType* mType)
+{
+	const uint16_t minLevel = std::max<uint16_t>(1, mType->info.minLevel);
+	const uint16_t maxLevel = std::max<uint16_t>(minLevel, mType->info.maxLevel);
+
+	if (minLevel == maxLevel) {
+		return minLevel;
+	}
+
+	return static_cast<uint16_t>(uniform_random(minLevel, maxLevel));
+}
+
+int32_t getMonsterLevelScaledHealth(int32_t baseHealth, uint16_t level)
+{
+	const double levelMultiplier = 1.0 + ((std::max<uint16_t>(1, level) - 1) * MONSTER_LEVEL_HEALTH_BUFF);
+	return std::max<int32_t>(1, static_cast<int32_t>(std::round(baseHealth * levelMultiplier)));
+}
+
 bool canTeleportSummonTo(Monster* summon, const Position& position)
 {
 	Tile* tile = g_game.map.getTile(position);
@@ -84,9 +104,9 @@ Monster::Monster(MonsterType* mType) : Creature(), nameDescription(mType->nameDe
 	defaultOutfit = mType->info.outfit;
 	currentOutfit = mType->info.outfit;
 	skull = mType->info.skull;
-	level = std::max<uint16_t>(1, mType->info.minLevel);
-	health = mType->info.health;
-	healthMax = mType->info.healthMax;
+	level = getMonsterSpawnLevel(mType);
+	healthMax = getMonsterLevelScaledHealth(mType->info.healthMax, level);
+	health = getMonsterLevelScaledHealth(mType->info.health, level);
 	baseSpeed = mType->info.baseSpeed;
 	internalLight = mType->info.light;
 	hiddenHealth = mType->info.hiddenHealth;
