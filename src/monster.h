@@ -68,8 +68,8 @@ public:
 	void setMasterPos(Position pos) { masterPos = pos; }
 
 	RaceType_t getRace() const override { return mType->info.race; }
-	int32_t getArmor() const override { return mType->info.armor; }
-	int32_t getDefense() const override { return mType->info.defense; }
+	int32_t getArmor() const override { return armor; }
+	int32_t getDefense() const override { return defense; }
 	bool isPushable() const override { return mType->info.pushable && baseSpeed != 0; }
 	bool isAttackable() const override { return mType->info.isAttackable; }
 
@@ -148,6 +148,8 @@ private:
 	MonsterType* mType;
 	Spawn* spawn = nullptr;
 	uint16_t level = 1;
+	int32_t armor = 0;
+	int32_t defense = 0;
 
 	int64_t lastMeleeAttack = 0;
 

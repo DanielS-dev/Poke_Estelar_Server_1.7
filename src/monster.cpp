@@ -18,6 +18,8 @@ extern Monsters g_monsters;
 namespace
 {
 constexpr double MONSTER_LEVEL_HEALTH_BUFF = 0.10;
+constexpr double MONSTER_LEVEL_ATTACK_BUFF = 0.05;
+constexpr double MONSTER_LEVEL_DEFENSE_BUFF = 0.05;
 
 uint16_t getMonsterSpawnLevel(const MonsterType* mType)
 {
@@ -35,6 +37,18 @@ int32_t getMonsterLevelScaledHealth(int32_t baseHealth, uint16_t level)
 {
 	const double levelMultiplier = 1.0 + ((std::max<uint16_t>(1, level) - 1) * MONSTER_LEVEL_HEALTH_BUFF);
 	return std::max<int32_t>(1, static_cast<int32_t>(std::round(baseHealth * levelMultiplier)));
+}
+
+int32_t getMonsterLevelScaledAttack(int32_t baseAttack, uint16_t level)
+{
+	const double levelMultiplier = 1.0 + ((std::max<uint16_t>(1, level) - 1) * MONSTER_LEVEL_ATTACK_BUFF);
+	return static_cast<int32_t>(std::round(baseAttack * levelMultiplier));
+}
+
+int32_t getMonsterLevelScaledDefense(int32_t baseDefense, uint16_t level)
+{
+	const double levelMultiplier = 1.0 + ((std::max<uint16_t>(1, level) - 1) * MONSTER_LEVEL_DEFENSE_BUFF);
+	return std::max<int32_t>(0, static_cast<int32_t>(std::round(baseDefense * levelMultiplier)));
 }
 
 bool canTeleportSummonTo(Monster* summon, const Position& position)
@@ -107,6 +121,8 @@ Monster::Monster(MonsterType* mType) : Creature(), nameDescription(mType->nameDe
 	level = getMonsterSpawnLevel(mType);
 	healthMax = getMonsterLevelScaledHealth(mType->info.healthMax, level);
 	health = getMonsterLevelScaledHealth(mType->info.health, level);
+	armor = getMonsterLevelScaledDefense(mType->info.armor, level);
+	defense = getMonsterLevelScaledDefense(mType->info.defense, level);
 	baseSpeed = mType->info.baseSpeed;
 	internalLight = mType->info.light;
 	hiddenHealth = mType->info.hiddenHealth;
@@ -2016,8 +2032,8 @@ bool Monster::getCombatValues(int32_t& min, int32_t& max)
 		return false;
 	}
 
-	min = minCombatValue;
-	max = maxCombatValue;
+	min = getMonsterLevelScaledAttack(minCombatValue, level);
+	max = getMonsterLevelScaledAttack(maxCombatValue, level);
 	return true;
 }
 
