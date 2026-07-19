@@ -12,6 +12,8 @@ event.onLook = function(self, thing, position, distance, description)
 			local pokeDefense = thing:getCustomAttribute("pokeDefense") or 0
 			description = string.format("%s\nPokemon: %s\nLevel: %d\nHP: %d / %d\nAttack: %d\nDefense: %d", description, pokeName, pokeLevel, pokeHealth, pokeMaxHealth, pokeAttack, pokeDefense)
 		end
+	elseif thing:isCreature() and thing:isMonster() and thing.getCurrentLevel then
+		description = string.format("You see %s [%d].", thing:getName():lower(), thing:getCurrentLevel())
 	end
 
 	if self:getGroup():getAccess() then
@@ -60,7 +62,7 @@ event.onLook = function(self, thing, position, distance, description)
 			end
 		end
 
-		if not isPlayerInventoryItem then
+		if not isPlayerInventoryItem and not (thing:isCreature() and thing:isMonster()) then
 			description = string.format(
 				"%s\nPosition: %d, %d, %d",
 				description, thingPosition.x, thingPosition.y, thingPosition.z
