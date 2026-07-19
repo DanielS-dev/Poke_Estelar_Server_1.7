@@ -410,14 +410,25 @@ void Creature::onCreatureMove(Creature* creature, const Tile* newTile, const Pos
 
 				bool teleported = false;
 				for (const Position& candidatePos : candidatePositions) {
+					Tile* candidateTile = g_game.map.getTile(candidatePos);
+					if (!candidateTile) {
+						continue;
+					}
+
+					if (candidateTile->hasProperty(CONST_PROP_BLOCKPATH) || candidateTile->hasProperty(CONST_PROP_BLOCKSOLID) ||
+					    candidateTile->hasProperty(CONST_PROP_IMMOVABLEBLOCKPATH) ||
+					    candidateTile->hasProperty(CONST_PROP_IMMOVABLEBLOCKSOLID)) {
+						continue;
+					}
+
+					if (candidateTile->queryAdd(0, *teleportCreature, 1, FLAG_IGNOREBLOCKITEM) != RETURNVALUE_NOERROR) {
+						continue;
+					}
+
 					if (g_game.internalTeleport(teleportCreature, candidatePos, false) == RETURNVALUE_NOERROR) {
 						teleported = true;
 						break;
 					}
-				}
-
-				if (!teleported) {
-					g_game.internalTeleport(teleportCreature, newPos, false);
 				}
 			}
 		}

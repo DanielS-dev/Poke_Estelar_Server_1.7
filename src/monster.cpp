@@ -90,11 +90,6 @@ bool teleportSummonNextToMaster(Monster* summon, Creature* master)
 		}
 	}
 
-	Tile* masterTile = g_game.map.getTile(masterPos);
-	if (masterTile && masterTile->queryAdd(0, *summon, 1, FLAG_IGNOREBLOCKITEM) == RETURNVALUE_NOERROR) {
-		return g_game.internalTeleport(summon, masterPos, false) == RETURNVALUE_NOERROR;
-	}
-
 	return false;
 }
 } // namespace
