@@ -5,9 +5,12 @@ event.onLook = function(self, thing, position, distance, description)
 	if thing:isItem() then
 		local pokeName = thing:getCustomAttribute("pokeName")
 		if pokeName then
+			local pokeLevel = thing:getCustomAttribute("pokeLevel") or 1
 			local pokeHealth = thing:getCustomAttribute("pokeHealth") or 0
 			local pokeMaxHealth = thing:getCustomAttribute("pokeMaxHealth") or 0
-			description = string.format("%s\nPokemon: %s\nHP: %d / %d", description, pokeName, pokeHealth, pokeMaxHealth)
+			local pokeAttack = thing:getCustomAttribute("pokeArmor") or 0
+			local pokeDefense = thing:getCustomAttribute("pokeDefense") or 0
+			description = string.format("%s\nPokemon: %s\nLevel: %d\nHP: %d / %d\nAttack: %d\nDefense: %d", description, pokeName, pokeLevel, pokeHealth, pokeMaxHealth, pokeAttack, pokeDefense)
 		end
 	end
 

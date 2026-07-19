@@ -2939,6 +2939,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod(L, "Monster", "isMonster", LuaScriptInterface::luaMonsterIsMonster);
 
 	registerMethod(L, "Monster", "getId", LuaScriptInterface::luaMonsterGetId);
+	registerMethod(L, "Monster", "getCurrentLevel", LuaScriptInterface::luaMonsterGetCurrentLevel);
 	registerMethod(L, "Monster", "getType", LuaScriptInterface::luaMonsterGetType);
 
 	registerMethod(L, "Monster", "rename", LuaScriptInterface::luaMonsterRename);
@@ -5015,8 +5016,9 @@ int LuaScriptInterface::luaGameCreateContainer(lua_State* L)
 
 int LuaScriptInterface::luaGameCreateMonster(lua_State* L)
 {
-	// Game.createMonster(monsterName, position[, extended = false[, force = false[, magicEffect = CONST_ME_TELEPORT]]])
-	Monster* monster = Monster::createMonster(tfs::lua::getString(L, 1));
+	// Game.createMonster(monsterName, position[, extended = false[, force = false[, magicEffect = CONST_ME_TELEPORT[, level = 0]]]])
+	uint16_t forcedLevel = tfs::lua::getNumber<uint16_t>(L, 6, 0);
+	Monster* monster = Monster::createMonster(tfs::lua::getString(L, 1), forcedLevel);
 	if (!monster) {
 		lua_pushnil(L);
 		return 1;
@@ -11453,6 +11455,18 @@ int LuaScriptInterface::luaMonsterGetId(lua_State* L)
 		}
 
 		lua_pushinteger(L, monster->getID());
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaMonsterGetCurrentLevel(lua_State* L)
+{
+	// monster:getCurrentLevel()
+	const Monster* monster = tfs::lua::getUserdata<const Monster>(L, 1);
+	if (monster) {
+		lua_pushnumber(L, monster->getLevel());
 	} else {
 		lua_pushnil(L);
 	}

@@ -104,13 +104,17 @@ int32_t Monster::despawnRadius;
 
 uint32_t Monster::monsterAutoID = 0x21000000;
 
-Monster* Monster::createMonster(const std::string& name)
+Monster* Monster::createMonster(const std::string& name, uint16_t forcedLevel)
 {
 	MonsterType* mType = g_monsters.getMonsterType(name);
 	if (!mType) {
 		return nullptr;
 	}
-	return new Monster(mType);
+	Monster* monster = new Monster(mType);
+	if (forcedLevel > 0) {
+		monster->setLevel(forcedLevel);
+	}
+	return monster;
 }
 
 Monster::Monster(MonsterType* mType) : Creature(), nameDescription(mType->nameDescription), mType(mType)
@@ -119,10 +123,7 @@ Monster::Monster(MonsterType* mType) : Creature(), nameDescription(mType->nameDe
 	currentOutfit = mType->info.outfit;
 	skull = mType->info.skull;
 	level = getMonsterSpawnLevel(mType);
-	healthMax = getMonsterLevelScaledHealth(mType->info.healthMax, level);
-	health = getMonsterLevelScaledHealth(mType->info.health, level);
-	armor = getMonsterLevelScaledDefense(mType->info.armor, level);
-	defense = getMonsterLevelScaledDefense(mType->info.defense, level);
+	refreshStatsForLevel(true);
 	baseSpeed = mType->info.baseSpeed;
 	internalLight = mType->info.light;
 	hiddenHealth = mType->info.hiddenHealth;
@@ -139,6 +140,27 @@ Monster::~Monster()
 {
 	clearTargetList();
 	clearFriendList();
+}
+
+void Monster::setLevel(uint16_t newLevel, bool fillHealth /* = true */)
+{
+	level = std::max<uint16_t>(1, newLevel);
+	refreshStatsForLevel(fillHealth);
+}
+
+void Monster::refreshStatsForLevel(bool fillHealth)
+{
+	healthMax = getMonsterLevelScaledHealth(mType->info.healthMax, level);
+	armor = getMonsterLevelScaledDefense(mType->info.armor, level);
+	defense = getMonsterLevelScaledDefense(mType->info.defense, level);
+
+	if (fillHealth) {
+		health = healthMax;
+		return;
+	}
+
+	const int32_t scaledHealth = getMonsterLevelScaledHealth(mType->info.health, level);
+	health = std::min<int32_t>(scaledHealth, healthMax);
 }
 
 void Monster::addList() { g_game.addMonster(this); }

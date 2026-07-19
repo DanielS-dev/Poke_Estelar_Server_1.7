@@ -79,7 +79,7 @@ function onUse(player, item, fromPosition, target, toPosition, isHotkey)
     local baseStorageTries = 0
 	local storageCatch = baseStorageCatches + monsterNumber
 	local storageTry = baseStorageTries + monsterNumber
-	local level = targetCorpse:getAttribute("corpseLevel") or initialLevel
+	local level = targetCorpse:getCustomAttribute("corpseLevel") or initialLevel
 	local teraType = targetCorpse:getAttribute("teraType") or 0
 	local chance = 0
 

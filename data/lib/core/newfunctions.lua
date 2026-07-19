@@ -16,6 +16,31 @@ function firstToUpper(str)
     return string.upper(string.sub(str, 1, 1)) .. string.sub(str, 2)
 end
 
+local function roundNumber(value)
+	return math.floor(value + 0.5)
+end
+
+local function getLevelScaledStatus(baseValue, level, perLevelBuff, minimumValue)
+	local currentLevel = math.max(1, tonumber(level) or 1)
+	local scaledValue = roundNumber(baseValue * (1.0 + ((currentLevel - 1) * perLevelBuff)))
+	if minimumValue ~= nil then
+		return math.max(minimumValue, scaledValue)
+	end
+	return scaledValue
+end
+
+local function getPokeballMaxHealth(monsterType, level)
+	return getLevelScaledStatus(monsterType:maxHealth(), level, 0.10, 1)
+end
+
+local function getPokeballArmor(monsterType, level)
+	return getLevelScaledStatus(monsterType:armor(), level, 0.05, 0)
+end
+
+local function getPokeballDefense(monsterType, level)
+	return getLevelScaledStatus(monsterType:defense(), level, 0.05, 0)
+end
+
 function doAddPokeball(cid, name, level, boost, ballKey, dp, msg, teratype)
 	local player = Player(cid)
 	local letter
@@ -57,14 +82,15 @@ function doAddPokeball(cid, name, level, boost, ballKey, dp, msg, teratype)
 			end
 		end
 		if addBall then
-			local baseHealth = monsterType:getMaxHealth()
-			local maxHealth = math.floor(baseHealth * statusGainFormula(player:getLevel(), level, boost, 0))
+			local maxHealth = getPokeballMaxHealth(monsterType, level)
 			addBall:setCustomAttribute("pokeName", name)
 			addBall:setCustomAttribute("pokeLevel", level)
 			addBall:setCustomAttribute("pokeBoost", boost)
 			--addBall:setAttribute("pokeExperience", getNeededExp(level))
 			addBall:setCustomAttribute("pokeMaxHealth", maxHealth)
 			addBall:setCustomAttribute("pokeHealth", maxHealth)
+			addBall:setCustomAttribute("pokeArmor", getPokeballArmor(monsterType, level))
+			addBall:setCustomAttribute("pokeDefense", getPokeballDefense(monsterType, level))
 			addBall:setCustomAttribute("pokeIsDead", 0)
 			addBall:setCustomAttribute("evhp", 0)
 			addBall:setCustomAttribute("evatk", 0)
@@ -285,6 +311,7 @@ function doRemoveSummon(cid, effect, message, safeRemove, missile)
 	end
 
 	ball:setCustomAttribute("pokeHealth", health)
+	ball:setCustomAttribute("pokeMaxHealth", summon:getMaxHealth())
 	ball:setCustomAttribute("pokeLookDir", summon:getDirection())
 	ball:setCustomAttribute("isBeingUsed", 0)
 	ball:removeAttribute("summonId")
@@ -374,6 +401,7 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 	end
 
 	local health = ball:getCustomAttribute("pokeHealth") or 0
+	local pokeLevel = ball:getCustomAttribute("pokeLevel") or 1
 	if health <= 0 then
 		player:sendCancelMessage("Sorry, not possible. Your summon is dead.")
 		ball:setCustomAttribute("pokeIsDead", 1)
@@ -388,7 +416,7 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 		return false
 	end
 
-	local monster = Game.createMonster(name, newPos, true, true)
+	local monster = Game.createMonster(name, newPos, true, true, CONST_ME_NONE, pokeLevel)
 	if not monster then
 		ball:setCustomAttribute("isBeingUsed", 0)
     	return false
@@ -406,9 +434,13 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 	monster:setFollowCreature(player)
 	monster:registerEvent("PokeSummonDeath")
 
-	local maxHealth = ball:getCustomAttribute("pokeMaxHealth") or monster:getMaxHealth()
-	monster:setMaxHealth(maxHealth)
-	monster:setHealth(math.min(health, maxHealth))
+	local maxHealth = monster:getMaxHealth()
+	local currentHealth = math.min(health, maxHealth)
+	ball:setCustomAttribute("pokeMaxHealth", maxHealth)
+	ball:setCustomAttribute("pokeHealth", currentHealth)
+	ball:setCustomAttribute("pokeArmor", getPokeballArmor(monsterType, pokeLevel))
+	ball:setCustomAttribute("pokeDefense", getPokeballDefense(monsterType, pokeLevel))
+	monster:setHealth(currentHealth)
 
 	if effect then
 		monster:getPosition():sendMagicEffect(effect)

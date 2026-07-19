@@ -1,4 +1,8 @@
 function Monster:onDropLoot(corpse)
+	if corpse and self.getCurrentLevel then
+		corpse:setCustomAttribute("corpseLevel", self:getCurrentLevel())
+	end
+
 	if hasEvent.onDropLoot then
 		Event.onDropLoot(self, corpse)
 	end

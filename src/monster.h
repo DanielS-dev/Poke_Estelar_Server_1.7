@@ -27,7 +27,7 @@ enum TargetSearchType_t
 class Monster final : public Creature
 {
 public:
-	static Monster* createMonster(const std::string& name);
+	static Monster* createMonster(const std::string& name, uint16_t forcedLevel = 0);
 
 	using Creature::onWalk;
 
@@ -80,6 +80,7 @@ public:
 	bool canSeeInvisibility() const override { return isImmune(CONDITION_INVISIBLE); }
 	uint32_t getManaCost() const { return mType->info.manaCost; }
 	uint16_t getLevel() const { return level; }
+	void setLevel(uint16_t newLevel, bool fillHealth = true);
 	void setSpawn(Spawn* spawn) { this->spawn = spawn; }
 	bool canWalkOnFieldType(CombatType_t combatType) const;
 
@@ -174,6 +175,7 @@ private:
 	void onCreatureEnter(Creature* creature);
 	void onCreatureLeave(Creature* creature);
 	void onCreatureFound(Creature* creature, bool pushFront = false);
+	void refreshStatsForLevel(bool fillHealth);
 
 	void updateLookDirection();
 
