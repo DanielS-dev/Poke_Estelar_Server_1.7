@@ -1,4 +1,10 @@
-local event = Event()
+﻿local event = Event()
+
+local function schedulePlayerPokemonBarUpdate(player)
+	if player then
+		schedulePokemonBarUpdate(player, 150)
+	end
+end
 
 event.onMoveItem = function(self, item, count, fromPosition, toPosition, fromThing, toThing)
 	if getBallKey and item and getBallKey(item:getId()) and item:getCustomAttribute("isBeingUsed") == 1 then
@@ -15,6 +21,7 @@ event.onMoveItem = function(self, item, count, fromPosition, toPosition, fromThi
 	end
 
 	if toPosition.x ~= CONTAINER_POSITION then
+		schedulePlayerPokemonBarUpdate(self)
 		return RETURNVALUE_NOERROR
 	end
 
@@ -28,6 +35,7 @@ event.onMoveItem = function(self, item, count, fromPosition, toPosition, fromThi
 		elseif itemType:getWeaponType() == WEAPON_SHIELD and toPosition.y == CONST_SLOT_RIGHT then
 			moveItem = self:getSlotItem(CONST_SLOT_LEFT)
 			if moveItem and bit.band(ItemType(moveItem:getId()):getSlotPosition(), SLOTP_TWO_HAND) == 0 then
+				schedulePlayerPokemonBarUpdate(self)
 				return RETURNVALUE_NOERROR
 			end
 		end
@@ -39,6 +47,7 @@ event.onMoveItem = function(self, item, count, fromPosition, toPosition, fromThi
 				return RETURNVALUE_CONTAINERNOTENOUGHROOM
 			end
 			if Player(topParent) then
+				schedulePlayerPokemonBarUpdate(self)
 				return moveItem:moveTo(parent) and RETURNVALUE_NOERROR or RETURNVALUE_NOTPOSSIBLE
 			else
 				return RETURNVALUE_BOTHHANDSNEEDTOBEFREE
@@ -46,6 +55,7 @@ event.onMoveItem = function(self, item, count, fromPosition, toPosition, fromThi
 		end
 	end
 
+	schedulePlayerPokemonBarUpdate(self)
 	return RETURNVALUE_NOERROR
 end
 

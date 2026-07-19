@@ -1,4 +1,4 @@
-local creatureevent = CreatureEvent("PokeSummonDeath")
+﻿local creatureevent = CreatureEvent("PokeSummonDeath")
 
 function creatureevent.onDeath(creature, corpse, killer, mostDamageKiller, lastHitUnjustified, mostDamageUnjustified)
 	local master = creature:getMaster()
@@ -12,9 +12,11 @@ function creatureevent.onDeath(creature, corpse, killer, mostDamageKiller, lastH
 	end
 
 	ball:setCustomAttribute("pokeHealth", 0)
+	ball:setCustomAttribute("pokeMaxHealth", creature:getMaxHealth())
 	ball:setCustomAttribute("pokeIsDead", 1)
 	ball:setCustomAttribute("isBeingUsed", 0)
 	ball:removeAttribute("summonId")
+	schedulePokemonBarUpdate(master, 50)
 	return true
 end
 

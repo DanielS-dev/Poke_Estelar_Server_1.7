@@ -1,5 +1,6 @@
-math.randomseed(os.time())
+﻿math.randomseed(os.time())
 dofile('data/lib/lib.lua')
+dofile('data/lib/core/pokemon_bar.lua')
 
 ropeSpots = {
 	384, 418, 8278, 8592, 13189, 14435, 14436, 14857, 15635, 19518, 24621, 24622, 24623, 24624, 26019
@@ -243,3 +244,4 @@ function checkDuplicateStorageKeys(varName)
 		return duplicates
 	end
 end
+

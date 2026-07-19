@@ -1,4 +1,4 @@
-balls = {
+﻿balls = {
 pokeball = {emptyId = 59268, usedOn = 59270, usedOff = 59268, effectFail = 350, effectSucceed = 351, missile = 192, effectRelease = 352, chanceMultiplier = 1.0}
 }
 
@@ -110,6 +110,7 @@ function doAddPokeball(cid, name, level, boost, ballKey, dp, msg, teratype)
 			end
 			
 			player:save()
+			schedulePokemonBarUpdate(player, 100)
 			
 			return true
 		else
@@ -134,7 +135,7 @@ function Player:canReleaseSummon(pokeLevel, pokeBoost, ownerName)
 	-- to fix ball bug
 	if not pokeLevel then return false end
 
-	--antiga usaga a quantidade de Insígnias
+	--antiga usaga a quantidade de InsÃ­gnias
 	--local playerLevel = self:getLevel() + (10 * getBadgeQuantity(self))
 	local playerLevel = self:getLevel()
 	local minimumLevel = (pokeLevel + pokeBoost) - 10
@@ -198,14 +199,14 @@ function Item:getSummonOwner()
 end
 
 function Monster.getTotalSpeed(self)
-	-- ADICIONE ESTE BLOCO ABAIXO BEM NO INÍCIO DO MÉTODO:
+	-- ADICIONE ESTE BLOCO ABAIXO BEM NO INÃCIO DO MÃ‰TODO:
     local ball = nil
     local master = self:getMaster()
     if master and master:isPlayer() then
         ball = master:getUsingBall()
     end
     
-    -- Se por acaso não achar a pokébola, define uma velocidade padrão para não quebrar
+    -- Se por acaso nÃ£o achar a pokÃ©bola, define uma velocidade padrÃ£o para nÃ£o quebrar
     if not ball then 
         return 250 
     end
@@ -213,7 +214,7 @@ function Monster.getTotalSpeed(self)
 	local monsterType = MonsterType(self:getName())
 	if self:isPokemon() then 
 		local total = math.floor(monsterType:getBaseSpeed() + (2 * self:getLevel()))
-		-- CÓDIGO CORRIGIDO COM PROTEÇÃO:
+		-- CÃ“DIGO CORRIGIDO COM PROTEÃ‡ÃƒO:
 		local vitamins = (ball.getUsedVitaminsNumber and ball:getUsedVitaminsNumber("speed")) or 0
 		if vitamins > 0 then
 			total = total + math.floor(monsterType:getBaseSpeed() * vitamins / maxVitamins * vitaminStatusBuff)
@@ -226,15 +227,15 @@ function Monster.getTotalSpeed(self)
 end
 
 function Monster.getTotalHealth(self)
-	local level = 1 -- Valor padrão de segurança
+	local level = 1 -- Valor padrÃ£o de seguranÃ§a
     
-		-- Descobre quem é o dono do Pokémon
+		-- Descobre quem Ã© o dono do PokÃ©mon
 		local master = self:getMaster()
 		if master and master:isPlayer() then
-			-- Pega a pokébola ativa que está na bag/slot do jogador
+			-- Pega a pokÃ©bola ativa que estÃ¡ na bag/slot do jogador
 			local ball = master:getUsingBall()
 			if ball then
-				-- Lê o level que salvamos na pokébola lá no catch!
+				-- LÃª o level que salvamos na pokÃ©bola lÃ¡ no catch!
 				level = ball:getCustomAttribute("pokeLevel") or 1
 			end
 		end
@@ -266,19 +267,19 @@ function Monster.getTotalHealth(self)
 	return 0
 end
 
--- Registro correto do método getLevel para a classe Monster no TFS 1.7
+-- Registro correto do mÃ©todo getLevel para a classe Monster no TFS 1.7
 function Monster.getLevel(self)
-    -- Descobre quem é o dono desse Pokémon
+    -- Descobre quem Ã© o dono desse PokÃ©mon
     local master = self:getMaster()
     if master and master:isPlayer() then
-        -- Busca a pokébola que está ativa com o jogador
+        -- Busca a pokÃ©bola que estÃ¡ ativa com o jogador
         local ball = master:getUsingBall()
         if ball then
-            -- Lê o level salvo na pokébola (onde o Item sim possui getCustomAttribute)
+            -- LÃª o level salvo na pokÃ©bola (onde o Item sim possui getCustomAttribute)
             return ball:getCustomAttribute("pokeLevel") or 1
         end
     end
-    return 1 -- Valor padrão de segurança caso não encontre
+    return 1 -- Valor padrÃ£o de seguranÃ§a caso nÃ£o encontre
 end
 
 function doRemoveSummon(cid, effect, message, safeRemove, missile)
@@ -302,6 +303,7 @@ function doRemoveSummon(cid, effect, message, safeRemove, missile)
 	if not summon then
 		ball:setCustomAttribute("isBeingUsed", 0)
 		ball:removeAttribute("summonId")
+		schedulePokemonBarUpdate(player, 50)
 		return false
 	end
 
@@ -333,6 +335,7 @@ function doRemoveSummon(cid, effect, message, safeRemove, missile)
 	summon:setFollowCreature(nil)
 	player:removeSummon(summon)
 	addEvent(doRemoveCreature, 1, summonGuid)
+	schedulePokemonBarUpdate(player, 50)
 	return true
 end
 
@@ -391,12 +394,14 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 	if not monsterType then
 		player:sendCancelMessage("Sorry, not possible. Monster invalid.")
 		ball:setCustomAttribute("isBeingUsed", 0)
+		schedulePokemonBarUpdate(player, 50)
 		return false
 	end
 
 	if ball:getCustomAttribute("pokeIsDead") == 1 then
 		player:sendCancelMessage("Sorry, not possible. Your summon is dead.")
 		ball:setCustomAttribute("isBeingUsed", 0)
+		schedulePokemonBarUpdate(player, 50)
 		return true
 	end
 
@@ -406,6 +411,7 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 		player:sendCancelMessage("Sorry, not possible. Your summon is dead.")
 		ball:setCustomAttribute("pokeIsDead", 1)
 		ball:setCustomAttribute("isBeingUsed", 0)
+		schedulePokemonBarUpdate(player, 50)
 		return true
 	end	
 
@@ -413,12 +419,14 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 	if not newPos then
 		player:sendCancelMessage("Sorry, not possible to call your summon here.")
 		ball:setCustomAttribute("isBeingUsed", 0)
+		schedulePokemonBarUpdate(player, 50)
 		return false
 	end
 
 	local monster = Game.createMonster(name, newPos, true, true, CONST_ME_NONE, pokeLevel)
 	if not monster then
 		ball:setCustomAttribute("isBeingUsed", 0)
+		schedulePokemonBarUpdate(player, 50)
     	return false
  	end
 
@@ -433,6 +441,7 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 	monster:setTarget(nil)
 	monster:setFollowCreature(player)
 	monster:registerEvent("PokeSummonDeath")
+	monster:registerEvent("PokeSummonHealth")
 
 	local maxHealth = monster:getMaxHealth()
 	local currentHealth = math.min(health, maxHealth)
@@ -441,6 +450,7 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 	ball:setCustomAttribute("pokeArmor", getPokeballArmor(monsterType, pokeLevel))
 	ball:setCustomAttribute("pokeDefense", getPokeballDefense(monsterType, pokeLevel))
 	monster:setHealth(currentHealth)
+	schedulePokemonBarUpdate(player, 50)
 
 	if effect then
 		monster:getPosition():sendMagicEffect(effect)
@@ -452,3 +462,5 @@ function doReleaseSummon(cid, pos, effect, message, missile)
 	monster:removeTarget(player)
 	return monster:getId()
 end
+
+

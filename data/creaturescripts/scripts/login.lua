@@ -1,4 +1,4 @@
-function onLogin(player)
+﻿function onLogin(player)
 	local serverName = configManager.getString(configKeys.SERVER_NAME)
 	local loginStr = "Welcome to " .. serverName .. "!"
 	if player:getLastLoginSaved() <= 0 then
@@ -36,5 +36,6 @@ function onLogin(player)
 	player:registerEvent("PlayerDeath")
 	player:registerEvent("DropLoot")
 	player:registerEvent("BestiaryKills")
+	schedulePokemonBarUpdate(player, 1200)
 	return true
 end
