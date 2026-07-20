@@ -1,3 +1,5 @@
+local MAIN_BAG_ID = 59271
+
 function onDeath(player, corpse, killer, mostDamageKiller, lastHitUnjustified, mostDamageUnjustified)
 	if player:hasFlag(PlayerFlag_NotGenerateLoot) or player:getVocation():getId() == VOCATION_NONE then
 		return true
@@ -36,7 +38,7 @@ function onDeath(player, corpse, killer, mostDamageKiller, lastHitUnjustified, m
 	end
 
 	if not player:getSlotItem(CONST_SLOT_BACKPACK) then
-		player:addItem(ITEM_BAG, 1, false, CONST_SLOT_BACKPACK)
+		player:addItem(MAIN_BAG_ID, 1, false, CONST_SLOT_BACKPACK)
 	end
 	return true
 end

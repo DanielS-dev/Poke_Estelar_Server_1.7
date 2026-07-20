@@ -87,7 +87,13 @@ function sendPokemonBarData(player)
 end
 
 function updatePokemonBarForPlayer(playerOrId)
-    local player = type(playerOrId) == "number" and Player(playerOrId) or playerOrId
+    local player
+    if type(playerOrId) == "number" then
+        player = Player(playerOrId)
+    else
+        player = playerOrId
+    end
+
     if not player or not player:isPlayer() then
         return false
     end
@@ -96,7 +102,13 @@ function updatePokemonBarForPlayer(playerOrId)
 end
 
 function schedulePokemonBarUpdate(playerOrId, delay)
-    local player = type(playerOrId) == "number" and Player(playerOrId) or playerOrId
+    local player
+    if type(playerOrId) == "number" then
+        player = Player(playerOrId)
+    else
+        player = playerOrId
+    end
+
     if not player or not player:isPlayer() or not player:isUsingOtClient() then
         return false
     end

@@ -42944,4 +42944,9 @@
 		<attribute key="description" value="Possui 1.0x de chance de captura." />
 	</item>
 	<item id="59270" article="an" name="pokeball"/>
+
+	<item id="59271" article="a" name="badge bag">
+		<attribute key="containerSize" value="32" />
+		<attribute key="slotType" value="backpack" />
+	</item>
 </items>

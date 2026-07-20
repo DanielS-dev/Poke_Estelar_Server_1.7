@@ -1,4 +1,38 @@
-﻿function onLogin(player)
+local MAIN_BAG_ID = 59271
+
+local function ensureMainBag(player)
+	local backpack = player:getSlotItem(CONST_SLOT_BACKPACK)
+	if backpack and backpack:getId() == MAIN_BAG_ID then
+		return backpack
+	end
+
+	if not backpack then
+		return player:addItem(MAIN_BAG_ID, 1, false, CONST_SLOT_BACKPACK)
+	end
+
+	local items = {}
+	for slot = backpack:getSize() - 1, 0, -1 do
+		local item = backpack:getItem(slot)
+		if item then
+			items[#items + 1] = item
+		end
+	end
+
+	backpack:remove()
+
+	local mainBag = player:addItem(MAIN_BAG_ID, 1, false, CONST_SLOT_BACKPACK)
+	if not mainBag then
+		return nil
+	end
+
+	for i = 1, #items do
+		items[i]:moveTo(mainBag)
+	end
+
+	return mainBag
+end
+
+function onLogin(player)
 	local serverName = configManager.getString(configKeys.SERVER_NAME)
 	local loginStr = "Welcome to " .. serverName .. "!"
 	if player:getLastLoginSaved() <= 0 then
@@ -31,6 +65,8 @@
 	if not player:getStorageValue(PlayerStorageKeys.achievementsTotal) then
 		player:setStorageValue(PlayerStorageKeys.achievementsTotal, player:getAchievementPoints())
 	end
+
+	ensureMainBag(player)
 
 	-- Events
 	player:registerEvent("PlayerDeath")
